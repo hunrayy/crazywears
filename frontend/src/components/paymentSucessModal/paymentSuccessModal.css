@@ -1,0 +1,108 @@
+/* PaymentSuccessModal.css */
+
+.payment-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  overflow: hidden;
+  background-color: white;
+}
+
+.payment-modal {
+  background: #fff;
+  border-radius: 12px;
+  padding: 30px 25px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  animation: fadeIn 0.4s ease-out;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 1000;
+}
+
+.payment-modal h2 {
+  color: #28a745;
+  margin-bottom: 10px;
+  font-size: 1.5rem;
+}
+
+.payment-modal p {
+  color: #555;
+  font-size: 1rem;
+  margin-bottom: 25px;
+}
+
+.payment-btn {
+  background: #28a745;
+  color: #fff;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.payment-btn:hover {
+  background: #218838;
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  animation: glowScale 2s ease-in-out infinite;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.success-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke: #28a745;
+  stroke-width: 2;
+  fill: none;
+  animation: popIn 0.3s ease-out;
+}
+
+@keyframes popIn {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes glowScale {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(40, 167, 69, 0));
+  }
+  50% {
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 12px rgba(40, 167, 69, 0.6));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 0 rgba(40, 167, 69, 0));
+  }
+}

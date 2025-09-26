@@ -1,0 +1,30 @@
+.policy-container{
+    /* width: 100%; */
+
+    display: flex;
+    justify-content: center;
+    /* align-items: center; */
+    background-color: var(--bodyColor);
+    margin-top: var(--marginAboveTop);
+    gap: 20px;
+    /* min-height: calc(100vh - var(--marginAboveTop)); */
+}
+.ck-powered-by {
+    display: none !important;
+  }
+  
+
+
+.policy-wrapper{
+    /* margin-top: 20px; */
+    width: 500px;
+    padding: 20px;
+    /* background-color: red; */
+    
+}
+.policy-wrapper>p{
+    font-size: 35px;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+}

@@ -1,0 +1,68 @@
+/* @import url('https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;600;700&display=swap'); */
+@import url('https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600;700&display=swap');
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  --bodyColor: #f9eef1;
+  --marginAboveTop: 80px;
+  --lightColorSkeletonPlaceholder: #c7bec1;
+  /* font-family: 'EB Garamond', serif; */
+  font-family: 'Crimson Text', serif;
+  /* font-family: Poppins, Arial, Helvetica, sans-serif; */
+  font-family: Lato, Arial, Helvetica, sans-serif;
+}
+
+/* *{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    --bodyColor: #f9eef1;
+    --marginAboveTop: 80px;
+    --lightColorSkeletonPlaceholder: #c7bec1;
+    font-family: outfit;
+} */
+/* .placeholder{
+  background-color: #c7bec1;
+    border-radius: 10px;
+} */
+
+.placeholder {
+  background-color: #c7bec1;
+  border-radius: 5px;
+  position: relative;
+  overflow: hidden; /* ensures the shimmer doesn't spill outside */
+}
+
+/* Add shimmer effect */
+.placeholder::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+  animation: shimmer 1.5s infinite;
+}
+
+/* Animation keyframes */
+@keyframes shimmer {
+  100% {
+    left: 100%;
+  }
+}
+
+
+
+@media (max-width: 767px) {
+    *{
+        --marginAboveTop: 70px;
+        
+    }
+}

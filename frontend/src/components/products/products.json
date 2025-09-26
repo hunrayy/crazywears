@@ -1,0 +1,59 @@
+[
+    {
+        "id": 1,
+        "productImage": "https://www.bundlesbynmeri.com/cdn/shop/files/85C18D20-3CD0-4DD5-A714-E5F97C7F5D78.jpg?v=1710856935&width=360",
+        "productPriceInNaira": 300000,
+        "name": "Vietnamese bodywave bundle",
+        "productName": "Silky straight raw Vietnamese double drawn single donor hair"
+    },
+    {
+        "id": 2,
+        "productImage": "https://www.bundlesbynmeri.com/cdn/shop/files/B31AC4D6-AC00-41F2-AB96-0C8F77971296.jpg?v=1710829525&width=600",
+        "productPriceInNaira": 250000,
+        "name": "Body-Wave Wigs",
+        "productName": "Silky double drawn burmese hair 2-3 donors"
+    },
+    {
+        "id": 3,
+        "productImage": "https://www.bundlesbynmeri.com/cdn/shop/files/72634794-BA20-4A18-86F4-769C088C45CB_eff52cb9-5cc3-4269-b8dd-abf2fd2da990.jpg?v=1700772558&width=360",
+        "productPriceInNaira": 180000,
+        "name": "SILKY STRAIGHT WIGS",
+        "productName": "Silky straight raw Vietnamese double drawn single donor hair" 
+    },
+    {
+        "id": 4,
+        "productImage": "https://www.bundlesbynmeri.com/cdn/shop/files/069EC622-D344-40A0-9DE4-237406C3FCF4.jpg?v=1700781640&width=360",
+        "productPriceInNaira": 130000,
+        "name": "#613 RAW SILKY STRAIGHT WIGS",
+        "productName": "Silky double drawn burmese hair 2-3 donors"
+    },
+    {
+        "id": 5,
+        "productImage": "https://www.bundlesbynmeri.com/cdn/shop/files/preview_images/7fcab4f3d83d4dc1bdf916bfbf77b3b7.thumbnail.0000000000.jpg?v=1700267314&width=533",
+        "productPriceInNaira": 75000,
+        "name": "MOCHA MAMI",
+        "productName": "mocha mami comes in medium golden brown shade careful & professionally dyed from 1b using permanent colour"
+    },
+    {
+        "id": 6,
+        "productImage": "https://www.bundlesbynmeri.com/cdn/shop/files/CDFFA905-6AC1-4E30-ACFC-8CAE2B547DC1.jpg?v=1710831829&width=360",
+        "productPriceInNaira": 125000,
+        "name": "WATER WAVE WIGS",
+        "productName": "Silky bone straight double drawn burmese hair 2-3 donors"
+    },
+    {
+        "id": 7,
+        "productImage": "https://www.bundlesbynmeri.com/cdn/shop/files/C378DC8F-4955-436B-9755-7ADC6DD157D9.jpg?v=1710831479&width=360",
+        "productPriceInNaira": 175000,
+        "name": "KINKY-CURLY WIGS",
+        "productName": "Silky bone straight double drawn burmese hair 2-3 donors"
+    },
+    {
+        "id": 8,
+        "productImage": "https://www.bundlesbynmeri.com/cdn/shop/files/4679D128-67D0-47F6-96F2-CF9B500EBDE8.jpg?v=1710830241&width=360",
+        "productPriceInNaira": 280000,
+        "name": "KINKY-STRAIGHT WIGS",
+        "productName": "category: bone straight"
+    }
+
+]

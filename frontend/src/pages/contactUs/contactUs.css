@@ -1,0 +1,40 @@
+.contact-us-container{
+    width: 100%;
+    height: 100%;
+    margin-top: var(--marginAboveTop);
+    background-color: var(--bodyColor);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 50px 0;
+}
+
+.contact-us-wrapper{
+    width: 60%;
+    /* height: 100vh; */
+    /* background-color: red; */
+
+}
+
+.contact-us-form-input{
+    width: 100%;
+    outline: none;
+    /* min-height: 50px; */
+    border-radius: 20px;
+    resize: none;
+    border: 1px solid rgba(128, 128, 128, 0.74);
+    /* border: 1px solid grey; */
+
+    background-color: transparent;
+    padding: 10px;
+}
+.contact-us-form-input:focus{
+    background-color: transparent;
+
+}
+
+@media (max-width: 767px) {
+    .contact-us-wrapper{
+        width: 90%;
+    }
+}

@@ -1,0 +1,139 @@
+.navbar-component-container{
+    background-color: black;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    width: 100vw;
+    padding: 0 5vw;
+    /* padding: 0 100px; */
+    box-shadow: 0px 0px 3px 3px rgba(128, 128, 128, 0.401);
+}
+
+
+
+.wrapper{
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    height: 80px;
+    justify-content: space-between;
+
+}
+@media (max-width: 767px) {
+    .wrapper{
+        height: 70px;
+    }
+}
+
+.links-container{
+    position: absolute;
+    left: -900px;
+}
+.hamburgermenubar, .cancelmenubar{
+    color: rgba(255, 255, 255, 0.466);
+}
+.links-container-show{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.349);
+}
+.links-wrapper{
+    position: absolute;
+    top: 0;
+    left: -900px;
+}
+.links-wrapper-show{
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    animation-name: links-wrapper;
+    animation-duration: .3s;
+    font-size: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    padding: 30px 40px 30px 40px;
+    flex-direction: column;
+    height: 100vh;
+    width: 300px;
+    background-color: black;
+    overflow-y: auto;
+}
+
+/* Scrollbar styling for Webkit browsers */
+.links-wrapper-show::-webkit-scrollbar {
+    width: 5px; /* Adjust the width of the scrollbar */
+}
+.links-wrapper-show::-webkit-scrollbar-thumb {
+    background: #ffffffa5; /* Scrollbar color */
+    border-radius: 10px; /* Round scrollbar corners */
+}
+.links-wrapper-show::-webkit-scrollbar-thumb:hover {
+    background: rgb(128, 128, 128); /* Darker color on hover */
+}
+@keyframes links-wrapper {
+    from{
+        left: -900px;
+    }to{
+        left: 0;
+    }
+}
+/* .logo-buttons-container{
+    display: flex;
+    align-items: center;
+    gap: 400px;
+
+} */
+
+ 
+.account-details-dropdown-list{
+    background-color: white;
+    margin-top: 5px;
+    color: black;
+    position: absolute;
+    min-width: 138px;
+    width: 150px;
+    padding: 10px 0;
+    border-radius: 5px;
+    animation-name: account-details-dropdown-list;
+    animation-duration: 0.3s;
+    /* padding: 0 25px; */
+    /* min-width: 160px; */
+    font-family: Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-size: 15px;
+}
+@keyframes account-details-dropdown-list {
+    from{
+        transform: translateY(-10px);
+        opacity: 0;
+    }to{
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+.account-details-dropdown-list li{
+    padding: 5px 10px;
+}
+.account-details-dropdown-list li:hover{
+    background-color: rgba(128, 128, 128, 0.055);
+}
+
+.home-page-nav-item{
+    font-weight: bold;
+    color: white;
+    text-decoration: none;
+}
+.home-page-nav-item:hover {
+    color: #f8a5c2;
+    transition: .3s;
+  }
+
+
+
+
+

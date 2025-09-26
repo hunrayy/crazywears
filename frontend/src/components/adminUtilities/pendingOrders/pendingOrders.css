@@ -1,0 +1,106 @@
+.single-order-container-overlay{
+    width: 100vw;
+    height: 100vh;
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.5);
+    top: 0;
+    left: 0;
+    z-index: 3;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* padding: 20px; */
+}
+
+.single-order-wrapper{
+    background-color: white;
+    width: 80%;
+    height: 80vh;
+    padding: 20px;
+    border-radius: 10px;
+    /* height: 550px; */
+    /* max-height: 800%; */
+    overflow-y: auto;
+}
+
+
+.out-for-delivery-modal-wrapper{
+    background-color: white;
+    padding: 20px 0;
+    border-radius: 10px;
+    width: 40%;
+    margin: 0 20px;
+    overflow-y: auto;
+}
+
+
+@media (max-width: 767px) {
+    .out-for-delivery-modal-wrapper{
+        width: 90%;
+    }
+   
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* Container styling */
+.no-order-admin-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    /* background-color: #f4f4f9; */
+  }
+  
+  /* Content styling */
+  .no-order-admin-content {
+    margin: 20px;
+    text-align: center;
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+    max-width: 450px;
+    width: 100%;
+    color: #333;
+  }
+  
+  /* Heading styling */
+  .no-order-admin-content h1 {
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #333;
+  }
+  
+  /* Paragraph styling */
+  .no-order-admin-content p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 25px;
+    line-height: 1.5;
+  }
+  
+  /* Admin icon styling */
+  .admin-icon {
+    font-size: 60px;
+    /* color: #ff6347;  */
+    color: purple;
+    margin-top: 20px;
+  }
+  
+  /* Ensure that Font Awesome icons are properly styled */
+  .fas {
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+  }
+  

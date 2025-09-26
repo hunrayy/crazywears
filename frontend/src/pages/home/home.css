@@ -1,0 +1,64 @@
+.home-page-container{
+    background: var(--bodyColor);
+}
+
+
+
+
+
+
+/* style={{ marginTop: "50px", display: "flex", gap: "2em" }}  */
+
+.home-page-header-tag{
+    margin-top: 50px;
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    min-width: 100%;
+    flex-wrap: nowrap;
+    scrollbarGutter: "stable";
+    WebkitOverflowScrolling: "touch";
+    
+}
+
+ .each-category-item{
+    font-size: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    /* padding: 0.3em 1em; */
+    padding-top: 0.3em;
+    padding-bottom: 0.3em;
+    padding-right: 1em;
+    transition: 0.3s ease-in-out;
+ }
+ .each-category-item:hover{
+    color: #f672a7;
+ }
+
+.home-page-header-tag {
+    overflow-x: scroll;
+    scrollbar-width: auto; /* Ensures visibility in Firefox */
+    scrollbar-gutter: stable both-edges; /* Keeps space for scrollbar */
+  }
+  
+  /* WebKit browsers (Chrome, Safari, Edge) */
+  .home-page-header-tag::-webkit-scrollbar {
+    height: 4px; /* Keep it thin */
+    display: block !important; /* Forces visibility */
+  }
+  
+  .home-page-header-tag::-webkit-scrollbar-track {
+    background: transparent; /* Fully remove background */
+  }
+  
+  .home-page-header-tag::-webkit-scrollbar-thumb {
+    background: #999; /* Darker for visibility */
+    border-radius: 10px;
+    opacity: 1; /* Prevents fading */
+  }
+  
+  .home-page-header-tag::-webkit-scrollbar-thumb:hover {
+    background: #444; /* Slightly darker on hover */
+  }
+  
+  

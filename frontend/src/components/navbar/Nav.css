@@ -1,0 +1,132 @@
+
+/* --- Desktop Nav --- */
+.desktop-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 20px;
+    background: #111;
+    color: #fff;
+    height: 80px;
+}
+
+.desktop-nav .nav-links {
+  display: flex;
+  list-style: none;
+  gap: 20px;
+    /* font-weight: 800; */
+  /* background-color: red; */
+}
+
+.desktop-nav .nav-links a {
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 13px;
+
+}
+
+.desktop-nav .nav-actions button {
+  background: none;
+  border: none;
+  color: #fff;
+  margin-left: 15px;
+  /* font-size: 20px; */
+  cursor: pointer;
+}
+
+/* --- Mobile Top Nav --- */
+.top-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #111;
+  color: #fff;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+}
+
+/* --- Hamburger Menu --- */
+.mobile-menu {
+  position: fixed;
+  top: 0;
+  left: -100%;
+  width: 70%;
+  height: 100%;
+  background: #222;
+  transition: left 0.3s ease;
+  padding: 60px 20px 20px 20px; /* push down below top-nav */
+  z-index: 999;
+}
+
+.mobile-menu ul {
+  list-style: none;
+}
+
+.mobile-menu ul li {
+  margin: 20px 0;
+}
+
+.mobile-menu ul li a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 18px;
+
+}
+
+/* --- Bottom App-style Nav --- */
+.bottom-nav {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  background: #111;
+  /* color: #fff; */
+
+
+  background-color: #fff;
+  /* color: red; */
+  padding: 8px 0;
+  z-index: 1000;
+}
+
+.bottom-nav a {
+  text-align: center;
+  color: #fff;
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.bottom-nav a p {
+  font-size: 11px; /* smaller for mobile icons */
+  margin: 0;
+}
+
+
+.bottom-nav span {
+  display: block;
+  font-size: 20px;
+}
+
+/* --- Media Queries --- */
+
+/* Desktop: hide mobile elements */
+@media (min-width: 768px) {
+  .top-nav,
+  .mobile-menu,
+  .bottom-nav {
+    display: none;
+  }
+}
+
+/* Mobile: hide desktop nav */
+@media (max-width: 767px) {
+  .desktop-nav {
+    display: none;
+  }
+}

@@ -1,0 +1,163 @@
+.lengths-container{
+    display: flex;
+    flex-wrap: wrap;
+    min-height: 70px;
+    /* background-color: red; */
+
+    gap: 7px;
+    /* background-color: red; */
+    /* width: 300px; */
+}
+.length-button{
+    padding: 5px;
+    background-color: white;
+    color: rgba(0, 0, 0, 0.699);
+    border: 0.5px solid grey;
+    font-size: 15px;
+}
+.single-product-image-scroll-container {
+    display: flex;
+    overflow-x: auto; 
+    gap: 10px;
+    /* overflow-y: auto;  */
+    width: 100%;
+    height: auto;
+    scroll-snap-type: x mandatory;
+    max-height: 500px;
+    object-fit: cover;
+    /* background-color: white; */
+    /* background-color: rgba(128, 128, 128, 0.182); */
+    /* gap: 10px; */
+    /* background-color: green; */
+    /* color: #e3dadd; */
+}
+
+
+
+.fade-in-image {
+  transition: opacity 0.5s ease-in-out;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  display: block;
+}
+
+
+
+
+/* Custom scrollbar for webkit browsers (e.g., Chrome, Safari) */
+.single-product-image-scroll-container::-webkit-scrollbar {
+    height: 8px;  /* Slimmer scrollbar height */
+}
+
+.single-product-image-scroll-container::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.13);  /* Darker thumb color */
+    border-radius: 10px;  /* Rounded scrollbar thumb */
+}
+
+.single-product-image-scroll-container::-webkit-scrollbar-track {
+    background-color: rgba(0, 0, 0, 0.1);  /* Lighter scrollbar track */
+    background-color: #e3dadd;
+}
+
+.single-product-scrollable-image {
+    flex-shrink: 0;
+    width: 100%; 
+    height: auto;
+    object-fit: contain;
+    /* scroll-snap-align: start; */
+}
+
+.single-product-scrollable-image {
+  flex-shrink: 0;
+  height: 450px;              /* ✅ Fixed consistent height */
+  width: auto;                /* or width: 100%; depending on your layout */
+  object-fit: cover;          /* ✅ Crops and scales the image nicely */
+  border-radius: 8px;         /* optional: aesthetic */
+  scroll-snap-align: start;
+}
+
+
+.hover-button {
+    position: relative;
+    padding: 15px 30px;
+    font-size: 16px;
+    font-weight: bold;
+    color: black; /* Initially black text */
+    background: transparent;
+    border: 2px solid black;
+    cursor: pointer;
+    overflow: hidden;
+    z-index: 1;
+    transition: color 0.4s ease; /* Smooth transition for text color */
+}
+
+.hover-button::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 0;
+    background-color: black;
+    z-index: -1;
+    transition: height 0.5s ease; /* Smooth transition for background */
+}
+
+.hover-button:hover::before {
+    height: 100%; /* Background expands on hover */
+}
+
+.hover-button:hover {
+    color: white; /* Text turns white on hover */
+}
+@media (max-width: 577px) {
+    .small-images-container{
+        background-color: red;
+        display: flex;
+        gap: 30px;
+        /* max-width: 380px; */
+        margin-left: 10px;
+        width: 100%;
+    }
+    .lengths-container{
+        min-height: 100px;
+    }
+}
+
+
+
+
+
+
+
+
+
+/* .single-product-image-scroll-container {
+  display: flex;
+  overflow-x: scroll;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+}
+
+.single-product-scrollable-image {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+} */
+
+/* .single-product-image-scroll-container {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch; 
+  width: 100%;
+}
+
+.single-product-scrollable-image {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  width: 100%;
+  height: auto;
+} */
+

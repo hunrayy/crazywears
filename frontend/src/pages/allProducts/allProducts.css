@@ -1,0 +1,5 @@
+.all-products-page-container{
+    margin-top: var(--marginAboveTop);
+    background: var(--bodyColor);
+    color: black;
+}

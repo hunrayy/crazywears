@@ -1,0 +1,25 @@
+.chart-container{
+    height: 100%;
+    max-height: 500px;
+    min-height: 500px;
+    margin-bottom: 50px;
+
+}
+
+
+
+
+.chart-scroll-container {
+    width: 100%;         /* or fixed width */
+    max-width: 100%;     /* prevent container growing */
+    overflow-x: auto;    /* horizontal scroll */
+    border: 1px solid #ddd; /* optional */
+  }
+  
+@media (max-width: 991px) {
+    .chart-container{
+        width: 90vw;
+
+        
+    }
+}

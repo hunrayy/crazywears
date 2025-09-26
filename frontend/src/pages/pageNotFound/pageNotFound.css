@@ -1,0 +1,28 @@
+.page-not-found-container{
+    margin-top: var(--marginAboveTop);
+    background-color: var(--bodyColor);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 60vh;
+}
+
+.page-not-found-wrapper{
+    /* background-color: blue; */
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    gap: 20px;
+}
+
+.page-not-found-button{
+    background-color: black;
+    color: white;
+    padding: 10px 0;
+    border-radius: 10px;
+    text-decoration: none;
+}
+.page-not-found-button:hover{
+    text-decoration: none;
+    color: white;
+}

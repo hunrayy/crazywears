@@ -1,0 +1,45 @@
+.user-account-page-container{
+  margin-top: var(--marginAboveTop);
+  background-color: var(--bodyColor);
+}
+
+
+
+
+
+
+
+
+h3, h4, h5 {
+  font-weight: bold;
+}
+
+.btn-outline-purple {
+  background-color: white;
+  border: 2px solid #6A0DAD;
+  color: #6A0DAD;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.btn-outline-purple:hover {
+  background-color: #6A0DAD;
+  color: white;
+}
+
+
+.table {
+  background-color: white;
+}
+
+.table thead {
+  background-color: #f3e5f5;
+  color: #6A0DAD;
+}
+
+.table-bordered th, .table-bordered td {
+  border: 1px solid #ddd;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+  background-color: rgba(242, 239, 248, 0.5);
+}

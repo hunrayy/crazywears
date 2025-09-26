@@ -1,0 +1,159 @@
+
+.admin-page-container{
+    margin-top: 80px;
+    padding: 0 10px;
+    overflow-x: hidden;
+}
+
+.admin-page-sidebar-container{
+    width: 250px;
+    position: fixed;
+    box-shadow: 0 0 5px 0 rgba(0, 0, 0, 0.322);
+    height: calc(100% - 150px);
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 5px;
+    left: 20px;
+    background-color: white;
+    top: 100px;
+    gap: 10px;
+    overflow-y: auto;
+}
+/* Scrollbar styling for Webkit browsers */
+.admin-page-sidebar-container::-webkit-scrollbar {
+    width: 5px; /* Adjust the width of the scrollbar */
+}
+.admin-page-sidebar-container::-webkit-scrollbar-thumb {
+    background: #88888833; /* Scrollbar color */
+    border-radius: 10px; /* Round scrollbar corners */
+}
+.admin-page-sidebar-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(128, 128, 128, 0.572); /* Darker color on hover */
+}
+
+
+
+.admin-cancel-menubar{
+    display: none;
+}
+.admin-sidebar-icon-wrapper{
+    padding: 10px;
+    border-radius: 5px;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+.admin-sidebar-icon-wrapper:hover{
+    background-color: rgba(192, 189, 189, 0.11);
+    cursor: pointer;
+}
+
+.admin-dashboard-content{
+    margin-left: 280px;
+    /* padding-top: 20px; */
+}
+
+.admin-sidebar-dropdown-container{
+    display: flex;
+    flex-direction: column;
+    align-items: start;
+}
+.admin-sidebar-dropdown-wrapper {
+    background-color: rgba(128, 128, 128, 0.202);
+    width: 100%;
+    border-radius: 5px;
+    transition: max-height 0.3s ease-out, opacity 0.3s ease-out;
+    overflow: hidden; /* Hide content while collapsing */
+    max-height: 0; /* Initially collapsed */
+    opacity: 0;
+    pointer-events: none; /* Prevent interaction when hidden */
+}
+.admin-sidebar-dropdown-wrapper.open {
+    max-height: 500px; /* Adjust height depending on the content */
+    opacity: 1;
+    pointer-events: all; /* Enable interaction */
+}
+
+/* Individual dropdown items */
+.admin-sidebar-dropdown-wrapper > div {
+    padding: 5px 20px;
+    cursor: pointer;
+    opacity: 1;
+}
+@keyframes dropdownSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.admin-sidebar-dropdown-wrapper>div{
+    padding: 5px 20px;
+    cursor: pointer;
+}
+
+
+@media (max-width: 991px) {
+
+    .admin-page-container{
+        height: 100%;
+        padding: 0;
+    }
+    .admin-sidebar-black{
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.671);
+        position: fixed;
+        top: 0;
+        z-index: 3;
+    }
+    
+    .admin-page-sidebar-container{
+       position: absolute;
+       height: 100vh;
+       top: 0;
+       z-index: 2;
+       left: -600px;
+    }
+    .admin-cancel-menubar{
+        display: block;
+    }
+    .show{
+        position: fixed;
+        height: 100vh;
+        left: 0;
+        animation-name: show;
+        animation-duration: .5s;
+        gap: 20px;
+    }
+    @keyframes show {
+        from{
+            left: -600px;
+        }to{
+            left: 0;
+        }
+    }
+
+    .admin-dashboard-content{
+        margin-left: 0;
+        padding-top: 0;
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+

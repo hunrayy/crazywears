@@ -1,0 +1,23 @@
+
+.empty-cart-wrapper{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* background-color: white; */
+   
+}
+
+.empty-cart-image{
+    height: 450px;
+}
+
+@media (max-width: 767px) {
+    .empty-cart-image{
+        height: 300px;
+    }
+    .empty-cart-wrapper{
+        display: flex;
+        flex-direction: column;
+        padding-bottom: 10vh;
+    }
+}
