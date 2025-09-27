@@ -1,19 +1,15 @@
-import { useState, useEffect } from "react";
+
+
+
+// Nav.jsx
+import { useState } from "react";
 import { navItems } from "./navItems";
 import "./Nav.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function Nav() {
-  const [isMobile, setIsMobile] = useState(false);
+  const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-
-  // Detect screen size
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    handleResize(); // initial
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
 
   // Split items dynamically
   const topNavItems = navItems.filter(item =>
@@ -34,61 +30,67 @@ export default function Nav() {
 
   return (
     <>
-      {/* Desktop Nav */}
-      {!isMobile && (
-        <nav className="desktop-nav">
-          <div className="logo">BrandLogo</div>
-          <ul className="nav-links">
-            {desktopLeftItems.map(item => (
-              <li key={item.name}><a href={item.link}>{item.name}</a></li>
-            ))}
-          </ul>
-          <div className="nav-actions">
-            {desktopRightItems.map(item => (
-              <button key={item.name}>{item.icon || item.name}</button>
-            ))}
-          </div>
-        </nav>
-      )}
+      {/* Desktop Nav (always mounted, hidden on mobile via CSS) */}
+      <nav className="desktop-nav">
+        <div className="logo">BrandLogo</div>
+        <ul className="nav-links">
+          {desktopLeftItems.map(item => (
+            <li key={item.name}>
+              <Link to={item.link} className="desktop-nav-link">
+                {item.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <div className="nav-actions">
+          {desktopRightItems.map(item => (
+            <button key={item.name}>{item.icon || item.name}</button>
+          ))}
+        </div>
+      </nav>
 
       {/* Mobile Top Nav */}
-      {isMobile && (
-        <header className="top-nav">
-            <div style={{ fontSize: "20px" }} className="hamburgermenubar" onClick={() => setMenuOpen(!menuOpen)}>
-                   <i style={{ cursor: "pointer" }} className="fa-solid fa-bars" onClick={() => setShownav(true)}></i>
-                 </div>
+      <header className="top-nav">
+        <div
+          style={{ fontSize: "20px" }}
+          className="hamburgermenubar"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          <i className="fa-solid fa-bars" style={{ cursor: "pointer" }}></i>
+        </div>
 
-
-          <div className="logo">BrandLogo</div>
-          {topNavItems.map(item => (
-            item.icon
-            // <button key={item.name}>{item.icon}</button>
-          ))}
-        </header>
-      )}
+        <div className="logo">BrandLogo</div>
+        {topNavItems.map(item => (
+          <div key={item.name}>{item.icon}</div>
+        ))}
+      </header>
 
       {/* Mobile Hamburger Menu */}
-      {isMobile && menuOpen && (
-        <nav className="mobile-menu">
-          <ul>
-            {desktopLeftItems.map(item => (
-              <li key={item.name}><a href={item.link}>{item.name}</a></li>
-            ))}
-          </ul>
-        </nav>
-      )}
+      <nav className={`mobile-menu ${menuOpen ? "open" : ""}`}>
+        <ul>
+          {desktopLeftItems.map(item => (
+            <li key={item.name}>
+              <Link to={item.link} className="mobile-menu-link">
+                {item.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </nav>
 
       {/* Mobile Bottom Nav */}
-      {isMobile && (
-        <footer className="bottom-nav">
-          {bottomNavItems.map(item => (
-            <Link key={item.name} to={item.link}>
-              <span>{item.icon}</span>
-              <p>{item.name}</p>
-            </Link>
-          ))}
-        </footer>
-      )}
+      <footer className="bottom-nav">
+        {bottomNavItems.map(item => (
+          <Link
+            key={item.name}
+            to={item.link}
+            className="bottom-link"
+          >
+            <span>{item.icon}</span>
+            <p>{item.name}</p>
+          </Link>
+        ))}
+      </footer>
     </>
   );
 }
@@ -101,6 +103,123 @@ export default function Nav() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import { useState, useEffect } from "react";
+// import { navItems } from "./navItems";
+// import "./Nav.css";
+// import { Link , useNavigate} from "react-router-dom";
+
+// export default function Nav() {
+//   const navigate = useNavigate()
+//   const [isMobile, setIsMobile] = useState(false);
+//   const [menuOpen, setMenuOpen] = useState(false);
+
+//   // Detect screen size
+//   useEffect(() => {
+//     const handleResize = () => setIsMobile(window.innerWidth < 768);
+//     handleResize(); // initial
+//     window.addEventListener("resize", handleResize);
+//     return () => window.removeEventListener("resize", handleResize);
+//   }, []);
+
+//   // Split items dynamically
+//   const topNavItems = navItems.filter(item =>
+//     ["SEARCH"].includes(item.name)
+//   );
+
+//   const desktopLeftItems = navItems.filter(item =>
+//     ["HOME", "SHOP", "CONTACT US", "POLICY", "TRACKING"].includes(item.name)
+//   );
+
+//   const desktopRightItems = navItems.filter(item =>
+//     ["SEARCH", "CART", "ACCOUNT"].includes(item.name)
+//   );
+
+//   const bottomNavItems = navItems.filter(item =>
+//     ["HOME", "SHOP", "CART", "ACCOUNT"].includes(item.name)
+//   );
+
+//   return (
+//     <>
+//       {/* Desktop Nav */}
+//       {!isMobile && (
+//         <nav className="desktop-nav">
+//           <div className="logo">BrandLogo</div>
+//           <ul className="nav-links">
+//             {desktopLeftItems.map(item => (
+//               <li key={item.name}><Link to={item.link} className="desktop-nav-link">{item.name}</Link></li>
+//             ))}
+//           </ul>
+//           <div className="nav-actions">
+//             {desktopRightItems.map(item => (
+//               <button key={item.name}>{item.icon || item.name}</button>
+//             ))}
+//           </div>
+//         </nav>
+//       )}
+
+//       {/* Mobile Top Nav */}
+//       {isMobile && (
+//         <header className="top-nav">
+//             <div style={{ fontSize: "20px" }} className="hamburgermenubar" onClick={() => setMenuOpen(!menuOpen)}>
+//                    <i style={{ cursor: "pointer" }} className="fa-solid fa-bars" onClick={() => setShownav(true)}></i>
+//                  </div>
+
+
+//           <div className="logo">BrandLogo</div>
+//           {topNavItems.map(item => (
+//             item.icon
+//             // <button key={item.name}>{item.icon}</button>
+//           ))}
+//         </header>
+//       )}
+
+//       {/* Mobile Hamburger Menu */}
+//       {isMobile && menuOpen && (
+//         <nav className="mobile-menu">
+//           <ul>
+//             {desktopLeftItems.map(item => (
+//               <li key={item.name}><Link to={item.link} className="mobile-menu-link">{item.name}</Link></li>
+//             ))}
+//           </ul>
+//         </nav>
+//       )}
+
+//       {/* Mobile Bottom Nav */}
+//       {isMobile && (
+//         <footer className="bottom-nav">
+//           {bottomNavItems.map(item => (
+//             <button key={item.name} onClick={()=> navigate(item.link)} to={item.link} className="bottom-link">
+//               <span>{item.icon}</span>
+//               <p>{item.name}</p>
+//             </button>
+//           ))}
+//         </footer>
+//       )}
+//     </>
+//   );
+// }
 
 
 

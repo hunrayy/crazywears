@@ -1,7 +1,7 @@
 // navItems.js
 export const navItems = [
   { name: "HOME", link: "/", icon: <i className="fas fa-home"></i> },
-  { name: "SHOP", link: "/shop", icon: <i className="fas fa-store"></i> },
+  { name: "SHOP", link: "/collections/all", icon: <i className="fas fa-store"></i> },
   { name: "CONTACT US", link: "/contact" },
   { name: "POLICY", link: "/policy" },
   { name: "TRACKING", link: "/tracking" },

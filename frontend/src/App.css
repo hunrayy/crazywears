@@ -5,7 +5,7 @@
   padding: 0;
   box-sizing: border-box;
   --bodyColor: #f9eef1;
-  --marginAboveTop: 80px;
+  --marginAboveTop: 100px;
   --lightColorSkeletonPlaceholder: #c7bec1;
   /* font-family: 'EB Garamond', serif; */
   font-family: 'Crimson Text', serif;
@@ -62,7 +62,7 @@
 
 @media (max-width: 767px) {
     *{
-        --marginAboveTop: 70px;
+        --marginAboveTop: 60px;
         
     }
 }
