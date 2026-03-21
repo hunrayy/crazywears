@@ -6,133 +6,57 @@ import { useState, useEffect, useContext } from 'react'
 import axios from 'axios'
 import { CurrencyContext } from '../../components/all_context/CurrencyContext'
 // import PaginationButton from '../../components/paginationButton/PaginationButton'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import Products from '../../components/products/Products'
 const AllProducts = () => {
     const { selectedCurrency, convertCurrency, currencySymbols } = useContext(CurrencyContext);
 
-    const location = useLocation();
-    const searchParams = new URLSearchParams(location.search);
-    const productCategory = searchParams.get("category");
-
+    // const location = useLocation();
+    // const searchParams = new URLSearchParams(location.search);
+    // const productCategory = searchParams.get("category");
+    const { category } = useParams()
+    const productCategory = category.replace(/-/g, ' '); //replacing all '-' with ' ' which is more readable
+    const [showPaginationButtons, setShowPaginationButtons] = useState(true)
+    
 
         // Define state for products and pagination
-        const [products, setProducts] = useState([]);
-        const [totalProducts, setTotalProducts] = useState([]);
-        const [currentPage, setCurrentPage] = useState(1);
-        const [showPaginationButtons, setShowPaginationButtons] = useState(true)
+        // const [products, setProducts] = useState([]);
+        // const [totalProducts, setTotalProducts] = useState([]);
+        // const [currentPage, setCurrentPage] = useState(1);
             // Fetch paginated products
-    const fetchProducts = async (page) => {
-        try {
-            const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/get-all-products`);
-            console.log(response)
-            if (response.data.code == "success"){
-                setProducts(response.data.data.data)
-                setTotalProducts(response.data.data); // Set products from paginated result
-                console.log(totalProducts)
-            }
-            // const { data } = response.data;
-            // setTotalProducts(data.total); // Total number of products
-        } catch (error) {
-            console.error('Error fetching products:', error);
-        }
-    };
-    const handlePaginate = async (link) => {
-        try{
-            console.log(totalProducts)
-            // console.log(link)
-            // Create a URL object
-            const urlObject = new URL(link.url);
-    
-            // Combine the pathname and search properties
-            const filteredPath = urlObject.pathname + urlObject.search;
-    
-            // Strip off '/api' if present
-            const strippedPath = filteredPath.replace(/^\/api/, '');
-    
-            const feedback = await axios.get(`${import.meta.env.VITE_BACKEND_URL}${strippedPath}`, {
-                // params: {
-                //     page: page,
-                //     perPage: perPage
-                // }
-            });
-            console.log(feedback)
-            if (feedback.data.code == "success"){
-                setProducts(feedback.data.data.data)
-                setTotalProducts(feedback.data.data); // Set products from paginated result
-            }
-        }catch(error){
-            return null
-        }
+    // const fetchProducts = async (page) => {
+    //     try {
+    //         const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/get-all-products`);
+    //         console.log(response)
+    //         if (response.data.code == "success"){
+    //             setProducts(response.data.data.data)
+    //             setTotalProducts(response.data.data); // Set products from paginated result
+    //             console.log(totalProducts)
+    //         }
+    //         // const { data } = response.data;
+    //         // setTotalProducts(data.total); // Total number of products
+    //     } catch (error) {
+    //         console.error('Error fetching products:', error);
+    //     }
+    // };  
 
-
-    }
-
-    useEffect(()=> {
-        fetchProducts()
-    }, [productCategory])
+    // useEffect(()=> {
+    //     fetchProducts()
+    // }, [productCategory])
 
         
     return <div>
         <Navbar />
         <div className="all-products-page-container">
             <section>
-                        {/* <video 
-    muted 
-    autoPlay 
-    loop 
-    playsInline 
-    style={{width: "100%"}}
-    src="https://images.hergivenhair.com/hghemail/2023/images/adv.mp4">
-    Your browser does not support the video tag.
-  </video> */}
+
             <div className="container">
-                <header className="" style={{padding: "30px 0"}}>
-                    {/* <h1 className=''><b>All Products</b></h1> */}
+                {/* <header className="" style={{padding: "30px 0"}}>
                     <h1 className=''><b>{productCategory}</b></h1>
-                </header>
+                </header> */}
                 <div>
-                    {/* <p style={{fontSize: "18px" }} className='float-right'>View all | {totalProducts.total} Products</p> */}
-                    {/* <div>
-                        <p><Link to='/' style={{fontWeight: "bold", color: "black", textDecoration: "none"}}>Home</Link> &gt; <Link to='/collections/all' style={{fontWeight: "bold", color: "black", textDecoration: "none"}}>all products</Link></p>
-                    </div> */}
-
-                </div>
-                <div className="row">
-                    {/* {
-                        products.map((product, index) => {
-                            const convertedPrice = Number(convertCurrency(product.productPriceInNaira, 'NGN', selectedCurrency)).toLocaleString();
-                            const currencySymbol = currencySymbols[selectedCurrency];
-
-                            return <div key={index} className="col-lg-3 col-md-6 col-sm-6 col-6 single-item-container" style={{textDecoration: "none", color: "black"}}>
-                            <div className="my-2">
-                       
-                                <img src={product.productImage} className="card-img-top rounded-2" style={{aspectRatio: "3 / 4", width: "100%", height: "auto"}} />
-                
-                            <div className="pl-2 pt-2">
-                                <h5 style={{display: "flex", gap: "5px"}}>
-                                    <span><b>{currencySymbol}</b></span>
-                                    <span><b>{convertedPrice.toLocaleString()}</b></span>
-                                </h5>
-                                <p className=" mb-0">{product.productName}</p>
-                            </div>
-                            </div>
-                        </div>
-                        })
-                    } */}
+                    
                     <Products productCategory={productCategory} showPaginationButtons={showPaginationButtons} />
-
-                    {/* <PaginationButton totalProducts={totalProducts} setTotalProducts={setTotalProducts} products={products} setProducts={setProducts} /> */}
-
-
-
-
-
-
-
-
-
-
 
                 </div>
             </div>
@@ -146,6 +70,52 @@ export default AllProducts
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// immediately under section tag
+                        {/* <video 
+    muted 
+    autoPlay 
+    loop 
+    playsInline 
+    style={{width: "100%"}}
+    src="https://images.hergivenhair.com/hghemail/2023/images/adv.mp4">
+    Your browser does not support the video tag.
+  </video> */}
 
 
 

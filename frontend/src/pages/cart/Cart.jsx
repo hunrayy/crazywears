@@ -1,101 +1,38 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import "./cart.css";
 import Navbar from "../../components/navbar/Navbar";
 import Footer from "../../components/footer/Footer";
-import { Link } from "react-router-dom";
-import React, { useState, useEffect, useContext, useMemo } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useContext } from "react";
 import { CartContext } from "./CartContext";
 import { CurrencyContext } from "../../components/all_context/CurrencyContext";
-import CartTotal, { calculateTotal } from "./CartTotal";
-import EmptyCart from '../../components/emptyCart/EmptyCart'
+import CartTotal from "./CartTotal";
+import EmptyCart from '../../components/emptyCart/EmptyCart';
 import { useAuth } from "../../components/AuthContext/AuthContext";
-import { useNavigate } from "react-router-dom";
+
 const Cart = () => {
-  const use_auth = useAuth()
-  const navigate = useNavigate()
-  const [isLoading, setIsLoading] = useState(true)
+  const use_auth = useAuth();
+  const navigate = useNavigate();
+
   const { selectedCurrency, convertCurrency, currencySymbols } = useContext(CurrencyContext);
   const { loading, cartProducts, addToCart, updateCartItemQuantity } = useContext(CartContext);
+
   const [allCartItems, setAllCartItems] = useState({ products: [] });
   const [removeItemFromCartModal, setRemoveItemFromCartModal] = useState({
     show: false,
     eachItem: null
-  })
+  });
 
-  const lengthsOfHair = [
-    `12", 12", 12"`,
-    `14", 14", 14"`,
-    `16", 16", 16"`,
-    `18", 18", 18"`,
-    `20", 20", 20"`,
-    `22", 22", 22"`,
-    `24", 24", 24"`,
-    `26", 26", 26"`,
-    `28", 28", 28"`,
-  ];
-  
-  // const initializeCartProducts = async() => {
-  //   // console.log(await cartProducts)
-  //   // setAllCartItems({products: cartProducts.products})
-  //   console.log(cartProducts)
-  // }
-
+  // Sync cart products from context
   useEffect(() => {
-    console.log(cartProducts)
-    // const storedItems = JSON.parse(localStorage.getItem("cart_items")) || [];
-    // const storedItems = cartProducts.then((feedback)=> {
-    // setAllCartItems({ products: feedback.products });
-
-    // });
-    // console.log(cartProducts)
-
     setAllCartItems({ products: cartProducts.products });
-    // initializeCartProducts()
   }, [cartProducts.products]);
+
+  // Redirect admins
   useEffect(() => {
-    console.log(cartProducts)
-    if (use_auth.user.is_user_logged && use_auth.user.user.is_an_admin && use_auth.user.user.user === "admin") {
-        navigate(`/beautybykiara/admin/dashboard/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqb2huc21pdGhAZ21haWwuY29tIjoiam9obnNtaXRoQGdtYWlsLmNvbSIsImpvaG4iOiJqb2hu`);
-        setIsLoading(false)
-    } else {
-        setIsLoading(false); // Allow page to render for non-admin users
+    if (use_auth.user.is_user_logged && use_auth.user.user.is_an_admin) {
+      navigate(`/beautybykiara/admin/dashboard/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqb2huc21pdGhAZ21haWwuY29tIjoiam9obnNtaXRoQGdtYWlsLmNvbSIsImpvaG4iOiJqb2hu`);
     }
   }, [use_auth.user, navigate]);
-  // const handleRemoveFromCart = (product) => {
-  //   addToCart(product);
-  // };
-
-  const updateItemQuantity = (each_item, quantity) => {
-    const updatedProducts = allCartItems.products.map((item) => item.id === each_item.id ? { ...item, quantity: item.quantity + quantity } : item);
-    setAllCartItems({ products: updatedProducts });
-    localStorage.setItem("cart_items", JSON.stringify(updatedProducts));
-  };
-
-  // const showRemoveFromCartModal = (each_item) => {
-  //   setRemoveItemFromCartModal({show: true, eachItem: each_item})
-  // }
 
   const increaseButton = (each_item) => updateCartItemQuantity(each_item.id, each_item.quantity + 1);
   const decreaseButton = (each_item) => {
@@ -105,22 +42,54 @@ const Cart = () => {
   };
 
   const currencySymbol = currencySymbols[selectedCurrency];
-  if (isLoading) {
-    
-    // return null; // Optionally, you can return a loader here
-  }else{ return <div className="cart-page-container">
+
+  if (loading) {
+    return <div style={{width: "100%", height: "calc(100vh - var(--marginAboveTop))"}}></div>;
+  }
+
+  return (
+    <div className="cart-page-container">
       <Navbar />
-      {/* remove item from cart waring modal start */}
+
+      {/* Remove item modal */}
       {removeItemFromCartModal.show && removeItemFromCartModal.eachItem &&
-        <div className="remove-item-from-cart-overlay" onClick={()=> setRemoveItemFromCartModal({show: false, eachItem: null})}>
+        <div className="remove-item-from-cart-overlay" onClick={() => setRemoveItemFromCartModal({ show: false, eachItem: null })}>
           <div className="remove-item-from-cart-wrapper" onClick={(e) => e.stopPropagation()}>
-            <div style={{display: "flex", justifyContent: "space-between"}}>
-              <h5>Remove From Cart</h5> <span onClick={()=> setRemoveItemFromCartModal(false)} style={{cursor: "pointer"}}><i className="fa-solid fa-xmark"></i></span>
+            <div style={{ display: "flex", justifyContent: "space-between" }}>
+              <h5>Remove From Cart</h5>
+              <span onClick={() => setRemoveItemFromCartModal({ show: false, eachItem: null })} style={{ cursor: "pointer" }}>
+                <i className="fa-solid fa-xmark"></i>
+              </span>
             </div>
             <p>Do you really want to remove this item from cart?</p>
-            <div style={{display: "flex", gap: "20px"}}>
-              <button onClick={()=> setRemoveItemFromCartModal({show: false, eachItem: null})} className="btn" style={{border: "1px solid purple", width: "100%", padding: "10px"}}>Cancel</button>
-              <button onClick={()=> {addToCart(removeItemFromCartModal.eachItem), setRemoveItemFromCartModal({show: false, eachItem: null})}} className="btn" style={{background: "purple", color: "white", width: "100%", display: "flex", gap: "10px", justifyContent: "center", alignItems: "center"}}>
+            <div style={{ display: "flex", gap: "20px" }}>
+              <button className="btn" style={{ border: "1px solid purple", width: "100%", padding: "10px" }}
+                onClick={() => setRemoveItemFromCartModal({ show: false, eachItem: null })}>
+                Cancel
+              </button>
+              {/* <button className="btn" style={{ background: "purple", color: "white", width: "100%", display: "flex", gap: "10px", justifyContent: "center", alignItems: "center" }}
+                onClick={() => { addToCart(removeItemFromCartModal.eachItem); setRemoveItemFromCartModal({ show: false, eachItem: null }) }}>
+                <i className="fa-solid fa-trash"></i>
+                <span>Remove</span>
+              </button> */}
+
+              <button
+                className="btn"
+                style={{
+                  background: "purple",
+                  color: "white",
+                  width: "100%",
+                  display: "flex",
+                  gap: "10px",
+                  justifyContent: "center",
+                  alignItems: "center"
+                }}
+                onClick={() => {
+                  // Pass the full variant object!
+                  addToCart(removeItemFromCartModal.eachItem, removeItemFromCartModal.eachItem.variant);
+                  setRemoveItemFromCartModal({ show: false, eachItem: null });
+                }}
+              >
                 <i className="fa-solid fa-trash"></i>
                 <span>Remove</span>
               </button>
@@ -128,8 +97,8 @@ const Cart = () => {
           </div>
         </div>
       }
-      {/* remove item from cart waring modal end */}
 
+      {/* Breadcrumb */}
       <div className="breadcrumb-container">
         <div className="container py-4">
           <nav className="d-flex">
@@ -141,139 +110,101 @@ const Cart = () => {
           </nav>
         </div>
       </div>
-        {/* {cartProducts?.products?.length == 0 && <EmptyCart />} */}
-        {cartProducts?.cartEmpty && !loading || cartProducts.products?.length < 1 && !loading ? <EmptyCart /> : null}
-        {loading && <div style={{width: "100%", height: "calc(100vh - var(--marginAboveTop))"}}></div>}
 
-      <section className="my-5" style={cartProducts?.products?.length == 0 ? {display: "none"} : null}>
+      {/* Empty cart message */}
+      {cartProducts.cartEmpty && !loading ? <EmptyCart /> : null}
+
+      {/* Cart items */}
+      <section className="my-5" style={cartProducts.products?.length === 0 ? { display: "none" } : null}>
         <div className="container">
           <div className="row">
             <div className="col-lg-9">
               <div className="card border shadow-0">
                 <div className="m-4">
                   <h4 className="card-title mb-4">Your shopping cart</h4>
+
                   {cartProducts.products?.slice().reverse().map((each_item) => {
-                    console.log(each_item)
-                    let convertedPrice = convertCurrency(each_item.productPrice, import.meta.VITE_CURRENCY_CODE, selectedCurrency);
-                    convertedPrice = Number(convertedPrice);
-                    const generateCacheBustString = () => `?cb=${new Date().getTime()}`; // Generates a unique cache-busting string
-                    const productPrices = [each_item.productPrice12Inches, each_item.productPrice14Inches, 
-                      each_item.productPrice16Inches, each_item.productPrice18Inches, each_item.productPrice20Inches, 
-                      each_item.productPrice22Inches, each_item.productPrice24Inches, 
-                      each_item.productPrice26Inches, each_item.productPrice28Inches
-                    ]
+                    const productPrices = JSON.parse(each_item.productPrices || "[]");
+
+                    // Match stored variant
+                    const matchedVariant = productPrices.find(v =>
+                      Object.keys(each_item.variant || {}).every(key => v[key] === each_item.variant[key])
+                    ) || {};
+
+                    const unitPrice = Number(convertCurrency(matchedVariant.price || each_item.defaultPrice, import.meta.VITE_CURRENCY_CODE, selectedCurrency));
+                    const totalPrice = unitPrice * each_item.quantity;
+
                     return (
-                      <div key={each_item.id}>
-                      <div className="cart-products-wrapper mb-3">
+                      <div key={each_item.id} className="cart-products-wrapper mb-3">
                         <div className="col-lg-5">
-                          <div className="d-flex">
-                            <img src={each_item.productImage} className="border rounded me-3" style={{ width: "100px", height: "130px", cursor: "pointer" }} onClick={()=> navigate(`/product/${each_item.id}`, {replace: true})} />
+                          <div className="d-flex" style={{flexWrap: "wrap"}}>
+                            <img
+                              src={each_item.productImage}
+                              className="border rounded me-3"
+                              style={{ width: "100px", height: "130px", cursor: "pointer" }}
+                              onClick={() => navigate(`/product/${each_item.id}`)}
+                            />
                             <div>
                               <p className="nav-link">{each_item.productName}</p>
-                              <p className="text-muted ">{each_item.description}</p>
-                              {/* <p> */}
-                                <small><b>Length:</b> &nbsp;
-                                {each_item.lengthPicked}
+                              {/* {each_item.variant && Object.keys(each_item.variant).length > 0 && (
+                                <small>
+                                  <b>Variant:</b> {Object.entries(each_item.variant).map(([k,v]) => `${v}`).join(", ")}
                                 </small>
+                              )} */}
+                                  <span className="text-muted">Size: {each_item?.variant?.size}</span> <br />
+                                  <span className="text-muted">Quantity:  {each_item?.quantity}</span>
 
-                              {/* </p> */}
                             </div>
                           </div>
                         </div>
-                        {/* col-lg-4 d-flex flex-row flex-lg-column text-nowrap */}
-                        {/* <div style={{display: "flex", justifyContent: "space-between", width: "100%"}}> */}
-                        {/* <div style={{display: "flex"}}> */}
-                          <div className="cart-text-wrapper">
-                            <div className="d-flex align-items-center" style={{ gap: "10px" }}>
-                              <button className="cart-increase-decrease-btn" onClick={() => decreaseButton(each_item)} style={{cursor: each_item.quantity == 1 && "not-allowed"}}><i className="fa-solid fa-minus"></i></button>
-                              <span>{each_item.quantity}</span>
-                              <button className="cart-increase-decrease-btn" onClick={() => increaseButton(each_item)}><i className="fa-solid fa-plus"></i></button>
-                            </div>
-                              {/* {lengthsOfHair.map((length, index) =>
-                              
-                                each_item.lengthPicked === length &&
-                                convertCurrency(productPrices[index], import.meta.VITE_CURRENCY_CODE, selectedCurrency).toLocaleString()
-                                * each_item.quantity
-                              )} */}
-<div className="">
-  {lengthsOfHair.map((length, index) => {
-    const normalizeLength = (str) =>
-      str.replace(/[\s,]+/g, '').replace(/["']/g, '');
 
-    console.log(
-      "Comparing normalized:",
-      normalizeLength(each_item.lengthPicked),
-      "===",
-      normalizeLength(length)
-    );
+                        <div className="cart-text-wrapper">
+                          <div className="d-flex align-items-center" style={{ gap: "10px" }}>
+                            <button
+                              className="cart-increase-decrease-btn"
+                              onClick={() => decreaseButton(each_item)}
+                              style={{ cursor: each_item.quantity === 1 ? "not-allowed" : "pointer" }}
+                            >
+                              <i className="fa-solid fa-minus"></i>
+                            </button>
+                            <span>{each_item.quantity}</span>
+                            <button className="cart-increase-decrease-btn" onClick={() => increaseButton(each_item)}>
+                              <i className="fa-solid fa-plus"></i>
+                            </button>
+                          </div>
 
-    if (normalizeLength(each_item.lengthPicked) === normalizeLength(length)) {
-      console.log("✅ Matched length:", length);
+                          <div className="mt-2 fw-bold">
+                            {currencySymbol}{totalPrice.toLocaleString()}
+                          </div>
 
-      const rawPrice = productPrices[index];
-      console.log("Product price:", rawPrice);
-
-      const unitPrice = convertCurrency(
-        rawPrice,
-        import.meta.VITE_CURRENCY_CODE,
-        selectedCurrency
-      );
-      console.log("Converted unit price:", unitPrice);
-
-      if (unitPrice === null || unitPrice === undefined) return null;
-
-      const total = unitPrice * each_item.quantity;
-      console.log("Final total:", total);
-
-      return (
-        <React.Fragment key={index}>
-          {currencySymbol}{total.toLocaleString()}
-        </React.Fragment>
-      );
-    }
-
-    return null;
-  })}
-</div>
-
-
-
-                            <button className="btn btn-light border text-danger" onClick={() => setRemoveItemFromCartModal({show: true, eachItem: each_item})}> Remove <i className="fa-solid fa-trash"></i></button>
-                        {/* <div style={{}}>
-                        </div> */}
-                          {/* </div> */}
-                        {/* </div> */}
+                          <button
+                            className="btn btn-light border text-danger mt-2"
+                            onClick={() => setRemoveItemFromCartModal({ show: true, eachItem: each_item })}
+                          >
+                            Remove <i className="fa-solid fa-trash"></i>
+                          </button>
                         </div>
                       </div>
-                    </div>
                     );
                   })}
                 </div>
+
                 <div className="border-top pt-4 mx-4 mb-4">
                   <p><i className="fas fa-truck text-muted fa-lg"></i> Delivery charges apply based on your location</p>
                   <p className="text-muted">
-                    Delivery charges will apply based on your location and the weight of your order. Please refer to our <Link to="/policies/delivery-policy" style={{color: "purple"}}>delivery policy</Link> for detailed information on shipping rates and estimated delivery times. We appreciate your understanding and thank you for shopping with us!
+                    Delivery charges will apply based on your location and the weight of your order. Please refer to our <Link to="/policies/delivery-policy" style={{color: "purple"}}>delivery policy</Link> for details.
                   </p>
                 </div>
               </div>
             </div>
+
+            {/* Cart summary */}
             <div className="col-lg-3">
-              {/* <div className="card mb-3 border shadow-0">
-                <div className="card-body">
-                  <form>
-                    <label>Have coupon?</label>
-                    <div style={{ display: "flex", gap: "5px", marginTop: "10px" }}>
-                      <input type="text" placeholder="Coupon code" style={{ width: "160px" }} className="form-control" />
-                      <button className="btn" style={{ backgroundColor: "#f8f9fa", width: "70px" }} type="button">Apply</button>
-                    </div>
-                  </form>
-                </div>
-              </div> */}
               <div className="card shadow-0 border">
                 <div className="card-body">
                   <div className="d-flex justify-content-between">
                     <p className="mb-2">Total price:</p>
-                    <p className="mb-2">{<CartTotal />}</p>
+                    <p className="mb-2"><CartTotal /></p>
                   </div>
                   <div className="d-flex justify-content-between">
                     <p className="mb-2">Discount:</p>
@@ -286,26 +217,351 @@ const Cart = () => {
                   <hr />
                   <div className="d-flex justify-content-between">
                     <p className="mb-2">Total price:</p>
-                    <p className="mb-2 fw-bold">{<CartTotal />}</p>
+                    <p className="mb-2 fw-bold"><CartTotal /></p>
                   </div>
                   <small><Link style={{color: "purple"}} to="/policies/shipping-policy">Shipping</Link> calculated at checkout.</small>
                   <div className="mt-3">
-                    <button onClick={()=> {use_auth.user.is_user_logged == false ? navigate("/login", {replace: true}) : navigate("/products/checkout", {replace: true})}} className="btn w-100 shadow-0 mb-2" style={{ backgroundColor: "purple", color: "white" }}>{use_auth.user.is_user_logged == false ? "Login to check out" : "Proceed to checkout"}</button>
+                    <button
+                      onClick={() => use_auth.user.is_user_logged ? navigate("/products/checkout", { replace: true }) : navigate("/login", { replace: true })}
+                      className="btn w-100 shadow-0 mb-2"
+                      style={{ backgroundColor: "purple", color: "white" }}
+                    >
+                      {use_auth.user.is_user_logged ? "Proceed to checkout" : "Login to check out"}
+                    </button>
                     <Link to="/" className="btn btn-light w-100 border mt-2">Back to home</Link>
                   </div>
                 </div>
               </div>
             </div>
+
           </div>
         </div>
       </section>
 
       <Footer />
     </div>
-  }
-}
+  );
+};
 
 export default Cart;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import "./cart.css";
+// import Navbar from "../../components/navbar/Navbar";
+// import Footer from "../../components/footer/Footer";
+// import { Link } from "react-router-dom";
+// import React, { useState, useEffect, useContext, useMemo } from "react";
+// import { CartContext } from "./CartContext";
+// import { CurrencyContext } from "../../components/all_context/CurrencyContext";
+// import CartTotal, { calculateTotal } from "./CartTotal";
+// import EmptyCart from '../../components/emptyCart/EmptyCart'
+// import { useAuth } from "../../components/AuthContext/AuthContext";
+// import { useNavigate } from "react-router-dom";
+// const Cart = () => {
+//   const use_auth = useAuth()
+//   const navigate = useNavigate()
+//   const [isLoading, setIsLoading] = useState(true)
+//   const { selectedCurrency, convertCurrency, currencySymbols } = useContext(CurrencyContext);
+//   const { loading, cartProducts, addToCart, updateCartItemQuantity } = useContext(CartContext);
+//   const [allCartItems, setAllCartItems] = useState({ products: [] });
+//   const [removeItemFromCartModal, setRemoveItemFromCartModal] = useState({
+//     show: false,
+//     eachItem: null
+//   })
+
+//   const lengthsOfHair = [
+//     `12", 12", 12"`,
+//     `14", 14", 14"`,
+//     `16", 16", 16"`,
+//     `18", 18", 18"`,
+//     `20", 20", 20"`,
+//     `22", 22", 22"`,
+//     `24", 24", 24"`,
+//     `26", 26", 26"`,
+//     `28", 28", 28"`,
+//   ];
+  
+//   // const initializeCartProducts = async() => {
+//   //   // console.log(await cartProducts)
+//   //   // setAllCartItems({products: cartProducts.products})
+//   //   console.log(cartProducts)
+//   // }
+
+//   useEffect(() => {
+//     console.log(cartProducts)
+//     // const storedItems = JSON.parse(localStorage.getItem("cart_items")) || [];
+//     // const storedItems = cartProducts.then((feedback)=> {
+//     // setAllCartItems({ products: feedback.products });
+
+//     // });
+//     // console.log(cartProducts)
+
+//     setAllCartItems({ products: cartProducts.products });
+//     // initializeCartProducts()
+//   }, [cartProducts.products]);
+//   useEffect(() => {
+//     console.log(cartProducts)
+//     if (use_auth.user.is_user_logged && use_auth.user.user.is_an_admin && use_auth.user.user.user === "admin") {
+//         navigate(`/beautybykiara/admin/dashboard/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqb2huc21pdGhAZ21haWwuY29tIjoiam9obnNtaXRoQGdtYWlsLmNvbSIsImpvaG4iOiJqb2hu`);
+//         setIsLoading(false)
+//     } else {
+//         setIsLoading(false); // Allow page to render for non-admin users
+//     }
+//   }, [use_auth.user, navigate]);
+//   // const handleRemoveFromCart = (product) => {
+//   //   addToCart(product);
+//   // };
+
+//   const updateItemQuantity = (each_item, quantity) => {
+//     const updatedProducts = allCartItems.products.map((item) => item.id === each_item.id ? { ...item, quantity: item.quantity + quantity } : item);
+//     setAllCartItems({ products: updatedProducts });
+//     localStorage.setItem("cart_items", JSON.stringify(updatedProducts));
+//   };
+
+//   // const showRemoveFromCartModal = (each_item) => {
+//   //   setRemoveItemFromCartModal({show: true, eachItem: each_item})
+//   // }
+
+//   const increaseButton = (each_item) => updateCartItemQuantity(each_item.id, each_item.quantity + 1);
+//   const decreaseButton = (each_item) => {
+//     if (each_item.quantity > 1) {
+//       updateCartItemQuantity(each_item.id, each_item.quantity - 1);
+//     }
+//   };
+
+//   const currencySymbol = currencySymbols[selectedCurrency];
+//   if (isLoading) {
+//     // return null; // Optionally, you can return a loader here
+//   }else{ return <div className="cart-page-container">
+//       <Navbar />
+//       {/* remove item from cart waring modal start */}
+//       {removeItemFromCartModal.show && removeItemFromCartModal.eachItem &&
+//         <div className="remove-item-from-cart-overlay" onClick={()=> setRemoveItemFromCartModal({show: false, eachItem: null})}>
+//           <div className="remove-item-from-cart-wrapper" onClick={(e) => e.stopPropagation()}>
+//             <div style={{display: "flex", justifyContent: "space-between"}}>
+//               <h5>Remove From Cart</h5> <span onClick={()=> setRemoveItemFromCartModal(false)} style={{cursor: "pointer"}}><i className="fa-solid fa-xmark"></i></span>
+//             </div>
+//             <p>Do you really want to remove this item from cart?</p>
+//             <div style={{display: "flex", gap: "20px"}}>
+//               <button onClick={()=> setRemoveItemFromCartModal({show: false, eachItem: null})} className="btn" style={{border: "1px solid purple", width: "100%", padding: "10px"}}>Cancel</button>
+//               <button onClick={()=> {addToCart(removeItemFromCartModal.eachItem), setRemoveItemFromCartModal({show: false, eachItem: null})}} className="btn" style={{background: "purple", color: "white", width: "100%", display: "flex", gap: "10px", justifyContent: "center", alignItems: "center"}}>
+//                 <i className="fa-solid fa-trash"></i>
+//                 <span>Remove</span>
+//               </button>
+//             </div>
+//           </div>
+//         </div>
+//       }
+//       {/* remove item from cart waring modal end */}
+
+//       <div className="breadcrumb-container">
+//         <div className="container py-4">
+//           <nav className="d-flex">
+//             <h6 className="mb-0">
+//               <Link to="/" className="text-white-50">Home</Link>
+//               <span className="text-white-50 mx-2"> | </span>
+//               <Link className="text-white"><u>Shopping cart</u></Link>
+//             </h6>
+//           </nav>
+//         </div>
+//       </div>
+//         {/* {cartProducts?.products?.length == 0 && <EmptyCart />} */}
+//         {cartProducts?.cartEmpty && !loading || cartProducts.products?.length < 1 && !loading ? <EmptyCart /> : null}
+//         {loading && <div style={{width: "100%", height: "calc(100vh - var(--marginAboveTop))"}}></div>}
+
+//       <section className="my-5" style={cartProducts?.products?.length == 0 ? {display: "none"} : null}>
+//         <div className="container">
+//           <div className="row">
+//             <div className="col-lg-9">
+//               <div className="card border shadow-0">
+//                 <div className="m-4">
+//                   <h4 className="card-title mb-4">Your shopping cart</h4>
+//                   {cartProducts.products?.slice().reverse().map((each_item) => {
+//                     console.log(each_item)
+//                     let convertedPrice = convertCurrency(each_item.productPrice, import.meta.VITE_CURRENCY_CODE, selectedCurrency);
+//                     convertedPrice = Number(convertedPrice);
+//                     const generateCacheBustString = () => `?cb=${new Date().getTime()}`; // Generates a unique cache-busting string
+//                     const productPrices = [each_item.productPrice12Inches, each_item.productPrice14Inches, 
+//                       each_item.productPrice16Inches, each_item.productPrice18Inches, each_item.productPrice20Inches, 
+//                       each_item.productPrice22Inches, each_item.productPrice24Inches, 
+//                       each_item.productPrice26Inches, each_item.productPrice28Inches
+//                     ]
+//                     return (
+//                       <div key={each_item.id}>
+//                       <div className="cart-products-wrapper mb-3">
+//                         <div className="col-lg-5">
+//                           <div className="d-flex">
+//                             <img src={each_item.productImage} className="border rounded me-3" style={{ width: "100px", height: "130px", cursor: "pointer" }} onClick={()=> navigate(`/product/${each_item.id}`)} />
+//                             <div>
+//                               <p className="nav-link">{each_item.productName}</p>
+//                               <p className="text-muted ">{each_item.description}</p>
+//                               {/* <p> */}
+//                                 <small><b>Length:</b> &nbsp;
+//                                 {each_item.lengthPicked}
+//                                 </small>
+
+//                               {/* </p> */}
+//                             </div>
+//                           </div>
+//                         </div>
+//                         {/* col-lg-4 d-flex flex-row flex-lg-column text-nowrap */}
+//                         {/* <div style={{display: "flex", justifyContent: "space-between", width: "100%"}}> */}
+//                         {/* <div style={{display: "flex"}}> */}
+//                           <div className="cart-text-wrapper">
+//                             <div className="d-flex align-items-center" style={{ gap: "10px" }}>
+//                               <button className="cart-increase-decrease-btn" onClick={() => decreaseButton(each_item)} style={{cursor: each_item.quantity == 1 && "not-allowed"}}><i className="fa-solid fa-minus"></i></button>
+//                               <span>{each_item.quantity}</span>
+//                               <button className="cart-increase-decrease-btn" onClick={() => increaseButton(each_item)}><i className="fa-solid fa-plus"></i></button>
+//                             </div>
+//                               {/* {lengthsOfHair.map((length, index) =>
+                              
+//                                 each_item.lengthPicked === length &&
+//                                 convertCurrency(productPrices[index], import.meta.VITE_CURRENCY_CODE, selectedCurrency).toLocaleString()
+//                                 * each_item.quantity
+//                               )} */}
+// {/* <div className="">
+//   {lengthsOfHair.map((length, index) => {
+//     const normalizeLength = (str) =>
+//       str.replace(/[\s,]+/g, '').replace(/["']/g, '');
+
+//     console.log(
+//       "Comparing normalized:",
+//       normalizeLength(each_item.lengthPicked),
+//       "===",
+//       normalizeLength(length)
+//     );
+
+//     if (normalizeLength(each_item.lengthPicked) === normalizeLength(length)) {
+//       console.log("✅ Matched length:", length);
+
+//       const rawPrice = productPrices[index];
+//       console.log("Product price:", rawPrice);
+
+//       const unitPrice = convertCurrency(
+//         rawPrice,
+//         import.meta.VITE_CURRENCY_CODE,
+//         selectedCurrency
+//       );
+//       console.log("Converted unit price:", unitPrice);
+
+//       if (unitPrice === null || unitPrice === undefined) return null;
+
+//       const total = unitPrice * each_item.quantity;
+//       console.log("Final total:", total);
+
+//       return (
+//         <React.Fragment key={index}>
+//           {currencySymbol}{total.toLocaleString()}
+//         </React.Fragment>
+//       );
+//     }
+
+//     return null;
+//   })}
+// </div> */}
+
+
+
+//                             <button className="btn btn-light border text-danger" onClick={() => setRemoveItemFromCartModal({show: true, eachItem: each_item})}> Remove <i className="fa-solid fa-trash"></i></button>
+//                         {/* <div style={{}}>
+//                         </div> */}
+//                           {/* </div> */}
+//                         {/* </div> */}
+//                         </div>
+//                       </div>
+//                     </div>
+//                     );
+//                   })}
+//                 </div>
+//                 <div className="border-top pt-4 mx-4 mb-4">
+//                   <p><i className="fas fa-truck text-muted fa-lg"></i> Delivery charges apply based on your location</p>
+//                   <p className="text-muted">
+//                     Delivery charges will apply based on your location and the weight of your order. Please refer to our <Link to="/policies/delivery-policy" style={{color: "purple"}}>delivery policy</Link> for detailed information on shipping rates and estimated delivery times. We appreciate your understanding and thank you for shopping with us!
+//                   </p>
+//                 </div>
+//               </div>
+//             </div>
+//             <div className="col-lg-3">
+//               {/* <div className="card mb-3 border shadow-0">
+//                 <div className="card-body">
+//                   <form>
+//                     <label>Have coupon?</label>
+//                     <div style={{ display: "flex", gap: "5px", marginTop: "10px" }}>
+//                       <input type="text" placeholder="Coupon code" style={{ width: "160px" }} className="form-control" />
+//                       <button className="btn" style={{ backgroundColor: "#f8f9fa", width: "70px" }} type="button">Apply</button>
+//                     </div>
+//                   </form>
+//                 </div>
+//               </div> */}
+//               <div className="card shadow-0 border">
+//                 <div className="card-body">
+//                   <div className="d-flex justify-content-between">
+//                     <p className="mb-2">Total price:</p>
+//                     <p className="mb-2">{<CartTotal />}</p>
+//                   </div>
+//                   <div className="d-flex justify-content-between">
+//                     <p className="mb-2">Discount:</p>
+//                     <p className="mb-2 text-success">$00.00</p>
+//                   </div>
+//                   <div className="d-flex justify-content-between">
+//                     <p className="mb-2">TAX:</p>
+//                     <p className="mb-2">$00.00</p>
+//                   </div>
+//                   <hr />
+//                   <div className="d-flex justify-content-between">
+//                     <p className="mb-2">Total price:</p>
+//                     <p className="mb-2 fw-bold">{<CartTotal />}</p>
+//                   </div>
+//                   <small><Link style={{color: "purple"}} to="/policies/shipping-policy">Shipping</Link> calculated at checkout.</small>
+//                   <div className="mt-3">
+//                     <button onClick={()=> {use_auth.user.is_user_logged == false ? navigate("/login", {replace: true}) : navigate("/products/checkout", {replace: true})}} className="btn w-100 shadow-0 mb-2" style={{ backgroundColor: "purple", color: "white" }}>{use_auth.user.is_user_logged == false ? "Login to check out" : "Proceed to checkout"}</button>
+//                     <Link to="/" className="btn btn-light w-100 border mt-2">Back to home</Link>
+//                   </div>
+//                 </div>
+//               </div>
+//             </div>
+//           </div>
+//         </div>
+//       </section>
+
+//       <Footer />
+//     </div>
+//   }
+// }
+
+// export default Cart;
 
 
 

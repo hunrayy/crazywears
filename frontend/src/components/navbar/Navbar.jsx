@@ -1,17 +1,17 @@
-
-
-
 // Nav.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { navItems } from "./navItems";
 import "./Nav.css";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom"; // 👈 added useLocation
+import { useContext } from "react";
+import { CartContext } from "../../pages/cart/CartContext";
 
 export default function Nav() {
   const navigate = useNavigate();
+  const location = useLocation(); // 👈 get current route
   const [menuOpen, setMenuOpen] = useState(false);
+  const {cartCount} = useContext(CartContext)
 
-  // Split items dynamically
   const topNavItems = navItems.filter(item =>
     ["SEARCH"].includes(item.name)
   );
@@ -28,9 +28,17 @@ export default function Nav() {
     ["HOME", "SHOP", "CART", "ACCOUNT"].includes(item.name)
   );
 
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.classList.add("no-scroll");
+    } else {
+      document.body.classList.remove("no-scroll");
+    }
+  }, [menuOpen]);
+
   return (
     <>
-      {/* Desktop Nav (always mounted, hidden on mobile via CSS) */}
+      {/* Desktop Nav */}
       <nav className="desktop-nav">
         <div className="logo">BrandLogo</div>
         <ul className="nav-links">
@@ -54,7 +62,7 @@ export default function Nav() {
         <div
           style={{ fontSize: "20px" }}
           className="hamburgermenubar"
-          onClick={() => setMenuOpen(!menuOpen)}
+          onClick={() => setMenuOpen(true)}
         >
           <i className="fa-solid fa-bars" style={{ cursor: "pointer" }}></i>
         </div>
@@ -65,12 +73,23 @@ export default function Nav() {
         ))}
       </header>
 
+      {/* Overlay */}
+      {menuOpen && <div className="overlay" onClick={() => setMenuOpen(false)}></div>}
+
       {/* Mobile Hamburger Menu */}
       <nav className={`mobile-menu ${menuOpen ? "open" : ""}`}>
+        <button className="close-btn" onClick={() => setMenuOpen(false)}>
+          <i className="fa-solid fa-xmark"></i>
+        </button>
+
         <ul>
           {desktopLeftItems.map(item => (
             <li key={item.name}>
-              <Link to={item.link} className="mobile-menu-link">
+              <Link
+                to={item.link}
+                className="mobile-menu-link"
+                onClick={() => setMenuOpen(false)}
+              >
                 {item.name}
               </Link>
             </li>
@@ -80,16 +99,24 @@ export default function Nav() {
 
       {/* Mobile Bottom Nav */}
       <footer className="bottom-nav">
-        {bottomNavItems.map(item => (
-          <Link
-            key={item.name}
-            to={item.link}
-            className="bottom-link"
-          >
-            <span>{item.icon}</span>
-            <p>{item.name}</p>
-          </Link>
-        ))}
+        {bottomNavItems.map(item => {
+          const isActive = location.pathname === item.link; // 👈 check active route
+          return (
+            <Link
+              key={item.name}
+              to={item.link}
+              className={`nav-link-wrapper bottom-link ${isActive ? "active" : ""}`} // 👈 apply class
+            >
+              <span>{item.icon}</span>
+              <p>{item.name}</p>
+                {item.name === "CART" && cartCount > 0 && (
+                  <div className="cart-badge-wrapper">
+                      {cartCount}
+                  </div>
+                )}
+            </Link>
+          );
+        })}
       </footer>
     </>
   );
@@ -125,25 +152,32 @@ export default function Nav() {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// // Nav.jsx
 // import { useState, useEffect } from "react";
 // import { navItems } from "./navItems";
 // import "./Nav.css";
-// import { Link , useNavigate} from "react-router-dom";
+// import { Link, useNavigate } from "react-router-dom";
 
 // export default function Nav() {
-//   const navigate = useNavigate()
-//   const [isMobile, setIsMobile] = useState(false);
+//   const navigate = useNavigate();
 //   const [menuOpen, setMenuOpen] = useState(false);
 
-//   // Detect screen size
-//   useEffect(() => {
-//     const handleResize = () => setIsMobile(window.innerWidth < 768);
-//     handleResize(); // initial
-//     window.addEventListener("resize", handleResize);
-//     return () => window.removeEventListener("resize", handleResize);
-//   }, []);
-
-//   // Split items dynamically
 //   const topNavItems = navItems.filter(item =>
 //     ["SEARCH"].includes(item.name)
 //   );
@@ -160,66 +194,108 @@ export default function Nav() {
 //     ["HOME", "SHOP", "CART", "ACCOUNT"].includes(item.name)
 //   );
 
+//   useEffect(() => {
+//   if (menuOpen) {
+//     document.body.classList.add("no-scroll");
+//   } else {
+//     document.body.classList.remove("no-scroll");
+//   }
+// }, [menuOpen]);
+
 //   return (
 //     <>
 //       {/* Desktop Nav */}
-//       {!isMobile && (
-//         <nav className="desktop-nav">
-//           <div className="logo">BrandLogo</div>
-//           <ul className="nav-links">
-//             {desktopLeftItems.map(item => (
-//               <li key={item.name}><Link to={item.link} className="desktop-nav-link">{item.name}</Link></li>
-//             ))}
-//           </ul>
-//           <div className="nav-actions">
-//             {desktopRightItems.map(item => (
-//               <button key={item.name}>{item.icon || item.name}</button>
-//             ))}
-//           </div>
-//         </nav>
-//       )}
+//       <nav className="desktop-nav">
+//         <div className="logo">BrandLogo</div>
+//         <ul className="nav-links">
+//           {desktopLeftItems.map(item => (
+//             <li key={item.name}>
+//               <Link to={item.link} className="desktop-nav-link">
+//                 {item.name}
+//               </Link>
+//             </li>
+//           ))}
+//         </ul>
+//         <div className="nav-actions">
+//           {desktopRightItems.map(item => (
+//             <button key={item.name}>{item.icon || item.name}</button>
+//           ))}
+//         </div>
+//       </nav>
 
 //       {/* Mobile Top Nav */}
-//       {isMobile && (
-//         <header className="top-nav">
-//             <div style={{ fontSize: "20px" }} className="hamburgermenubar" onClick={() => setMenuOpen(!menuOpen)}>
-//                    <i style={{ cursor: "pointer" }} className="fa-solid fa-bars" onClick={() => setShownav(true)}></i>
-//                  </div>
+//       <header className="top-nav">
+//         <div
+//           style={{ fontSize: "20px" }}
+//           className="hamburgermenubar"
+//           onClick={() => setMenuOpen(true)}
+//         >
+//           <i className="fa-solid fa-bars" style={{ cursor: "pointer" }}></i>
+//         </div>
 
+//         <div className="logo">BrandLogo</div>
+//         {topNavItems.map(item => (
+//           <div key={item.name}>{item.icon}</div>
+//         ))}
+//       </header>
 
-//           <div className="logo">BrandLogo</div>
-//           {topNavItems.map(item => (
-//             item.icon
-//             // <button key={item.name}>{item.icon}</button>
-//           ))}
-//         </header>
-//       )}
+//       {/* Overlay */}
+//       {menuOpen && <div className="overlay" onClick={() => setMenuOpen(false)}></div>}
 
 //       {/* Mobile Hamburger Menu */}
-//       {isMobile && menuOpen && (
-//         <nav className="mobile-menu">
-//           <ul>
-//             {desktopLeftItems.map(item => (
-//               <li key={item.name}><Link to={item.link} className="mobile-menu-link">{item.name}</Link></li>
-//             ))}
-//           </ul>
-//         </nav>
-//       )}
+//       <nav className={`mobile-menu ${menuOpen ? "open" : ""}`}>
+//         {/* Close Button */}
+//         <button className="close-btn" onClick={() => setMenuOpen(false)}>
+//           <i className="fa-solid fa-xmark"></i>
+//         </button>
+
+//         <ul>
+//           {desktopLeftItems.map(item => (
+//             <li key={item.name}>
+//               <Link
+//                 to={item.link}
+//                 className="mobile-menu-link"
+//                 onClick={() => setMenuOpen(false)} // close after navigation
+//               >
+//                 {item.name}
+//               </Link>
+//             </li>
+//           ))}
+//         </ul>
+//       </nav>
 
 //       {/* Mobile Bottom Nav */}
-//       {isMobile && (
-//         <footer className="bottom-nav">
-//           {bottomNavItems.map(item => (
-//             <button key={item.name} onClick={()=> navigate(item.link)} to={item.link} className="bottom-link">
-//               <span>{item.icon}</span>
-//               <p>{item.name}</p>
-//             </button>
-//           ))}
-//         </footer>
-//       )}
+//       <footer className="bottom-nav">
+//         {bottomNavItems.map(item => (
+//           <Link
+//             key={item.name}
+//             to={item.link}
+//             className="bottom-link"
+//           >
+//             <span>{item.icon}</span>
+//             <p>{item.name}</p>
+//           </Link>
+//         ))}
+//       </footer>
 //     </>
 //   );
 // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

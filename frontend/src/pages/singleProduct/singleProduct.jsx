@@ -17,31 +17,32 @@ import { useSingleProduct } from "./useSingleProduct";
 
 const SingleProduct = () => {
  const navigate = useNavigate();
-  const { cartProducts, addToCart, updateCartItemLength } = useContext(CartContext);
+  const { cartProducts, addToCart, updateCartItemLength, isAnyVariantInCart } = useContext(CartContext);
   const { selectedCurrency, convertCurrency, currencySymbols } = useContext(CurrencyContext);
   let { productId } = useParams();
 
-  // const { product, lengthsOfHair, productPrices, isLoading, error, isFetching } = useSingleProduct(productId);
-  const { product, lengthsOfHair, productPrices, isLoading, error, pageNotFound } = useSingleProduct(productId);
+  const { product, productSizes, productPrices, isLoading, error, pageNotFound } = useSingleProduct(productId);
+console.log(product)
+console.log(productSizes)
+console.log(productPrices)
 
-  // const isLoading = true
-  // const { product, lengthsOfHair, productPrices, error, isFetching } = useSingleProduct(productId);
 
   const [selectedImage, setSelectedImage] = useState(""); // State for the enlarged image
 
-  const [lengthState, setLengthState] = useState({
-    length: [],
-    lengthPicked: ""
+  const [sizeState, setSizeState] = useState({
+    sizes: [],
+    sizePicked: ""
   });
 
   useEffect(() => {
-    if (lengthsOfHair.length > 0) {
-      setLengthState({
-        length: lengthsOfHair,
-        lengthPicked: lengthsOfHair[0]  // Default to first length
+    console.log(product)
+    if (productSizes.length > 0) {
+      setSizeState({
+        sizes: productSizes,
+        sizePicked: productSizes[0]  // Default to first size
       });
     }
-  }, [lengthsOfHair]);
+  }, [productPrices]);
 
   // useEffect(() => {
   //   if (product.pageNotFound) {
@@ -67,27 +68,34 @@ const SingleProduct = () => {
 // }, [product.pageNotFound, isLoading, navigate]);
 
 
-  // Check localStorage cart to set picked length if present
+  // Check localStorage cart to set picked size if present
   useEffect(() => {
     if (!product.id) return;
     const cartItems = JSON.parse(localStorage.getItem("cart_items")) || [];
     const cartItem = cartItems.find(item => item.id === product.id);
-    if (cartItem && cartItem.lengthPicked) {
-      if (lengthsOfHair.includes(cartItem.lengthPicked)) {
-        setLengthState(prev => ({ ...prev, lengthPicked: cartItem.lengthPicked }));
+    if (cartItem && cartItem.pricePicked) {
+      if (productPrices.includes(cartItem.pricePicked)) {
+        setSizeState(prev => ({ ...prev, sizePicked: cartItem.sizePicked }));
       } else {
-        setLengthState(prev => ({ ...prev, lengthPicked: lengthsOfHair[0] || "" }));
+        setSizeState(prev => ({ ...prev, sizePicked: productSizes[0] || "" }));
       }
     }
-  }, [product.id, lengthsOfHair]);
+  }, [product.id, productPrices]);
 
-  const handleAddToCart = () => {
-    addToCart(product, lengthState.lengthPicked);
+ const handleAddToCart = () => {
+    const variant = { size: sizeState.sizePicked }; // store size under variant
+    addToCart(product, variant);
   };
 
-  const handleLengthChange = (length, lengthPrice) => {
-    setLengthState(prevState => ({ ...prevState, lengthPicked: length }));
-    updateCartItemLength(product.id, length, lengthPrice);
+//   const prices = JSON.parse(product.productPrices);
+
+// const smallestPrice = Math.min(
+//   ...prices.map(p => Number(p.price))
+// );
+
+// console.log(smallestPrice); // 80000
+  const handlesizeChange = (size, sizePrice) => {
+    setSizeState(prevState => ({ ...prevState, sizePicked: size }));
   };
 
   const handleImageClick = (img) => {
@@ -95,7 +103,9 @@ const SingleProduct = () => {
   };
 
   const cartItems = JSON.parse(localStorage.getItem("cart_items")) || [];
-  const inCart = cartItems.some(item => item.id === product.id);
+  const inCart = cartItems.some(
+    item => item.id === product.id && item.variant?.size === sizeState.sizePicked
+  );
 
   const currencySymbol = currencySymbols[selectedCurrency] || '';
 
@@ -107,7 +117,7 @@ const SingleProduct = () => {
   ];
 
   const convertedPrice = convertCurrency(
-    productPrices[lengthsOfHair.indexOf(lengthState.lengthPicked)] || 0,
+    productPrices[productPrices.indexOf(sizeState.sizePicked)] || 0,
     import.meta.env.VITE_CURRENCY_CODE,
     selectedCurrency
   );
@@ -136,9 +146,9 @@ if (error) return <div><p>Error retrieving product.</p></div>;
                 {cartProducts.addToCartAnimationMessage} 
               </div>
             )}
-            {cartProducts.lengthUpdateMessage && (
+            {cartProducts.sizeUpdateMessage && (
               <div style={{ width: "100%", height: "50px", backgroundColor: "green", display: "flex", justifyContent: "center", alignItems: "center", color: "white", position: "fixed", top: "0", zIndex: "2" }}>
-                {cartProducts.lengthUpdateMessage}
+                {cartProducts.sizeUpdateMessage}
               </div>
             )} */}
             <div className="container">
@@ -231,20 +241,22 @@ if (error) return <div><p>Error retrieving product.</p></div>;
                         isLoading ? <div className="placeholder mt-3" style={{width: "150px", height: "30px"}}></div> :
                         <div style={{display: "flex"}}>
                           <div className="h5" style={{display: "flex", minWidth: "30px"}}>
+                            <strong>
+                              <mark>
                             <span>{currencySymbol}</span>
-                            {console.log(lengthState)}
-                            {/* {lengthState.length.map((length, index) =>
-                              lengthState.lengthPicked === length &&
-                              convertCurrency(productPrices[index], import.meta.env.VITE_CURRENCY_CODE, selectedCurrency).toLocaleString()
-                            )} */}
-
-                            {lengthState.length.map((length, index) => {
-                              if (lengthState.lengthPicked === length) {
+                              
+                            {sizeState.sizes.map((size, index) => {
+                              if (sizeState.sizePicked === size) {
+                                console.log(product)
                                 const converted = convertCurrency(productPrices[index], import.meta.env.VITE_CURRENCY_CODE, selectedCurrency);
+
                                 return converted !== null ? converted.toLocaleString() : <span className='placeholder' style={{width: "30px", }}></span> ; // or show fallback
                               }
                               return null;
                             })}
+                            </mark>
+                            </strong>
+           
 
                           </div>
                           <span className="text-muted">&nbsp;/&nbsp;per item</span>
@@ -254,28 +266,27 @@ if (error) return <div><p>Error retrieving product.</p></div>;
                     </div>
                     <div style={{minHeight: "50px"}}>
                       {isLoading ? <div className="placeholder" style={{width: "50%", height: "30px"}}></div> :
-                      <div className="text-muted mb-1">Category: {product?.category?.name}</div>}
-                      {!isLoading && <div className="text-muted">Length: {lengthState.lengthPicked}</div> }
+                      <div className="text-muted mb-2">Category: {product?.category?.name}</div>}
+                      {!isLoading && <div className="text-muted">size: {sizeState.sizePicked}</div> }
                      
                     </div>
                           
                           
                     <div className="row mt-2">
-                        <div className="lengths-container">
+                        <div className="sizes-container">
                           {isLoading? <div className="placeholder mt-3" style={{width: "100%", height: "80px"}}></div>
-                          : lengthState.length?.map((length, index) => {
-                            console.log(lengthState)
+                          : sizeState.sizes?.map((size, index) => {
                             return <div key={index} className="">
                               <button
-                                className="length-button "
-                                style={lengthState.lengthPicked === length ? { backgroundColor: "black", color: "white" } : null }
+                                className="size-button btn"
+                                style={sizeState.sizePicked === size ? { backgroundColor: "black", color: "white" } : null }
                                 onClick={() => {
-                                  const index = lengthState.length.findIndex(item => item == length); // Find the index of the selected length
-                                  const price = productPrices[index]; // Get the price for the selected length
-                                  handleLengthChange(length, price); // Pass the specific price instead of an array
+                                  const index = sizeState.sizes.findIndex(item => item == size); // Find the index of the selected size
+                                  const price = productPrices[index]; // Get the price for the selected size
+                                  handlesizeChange(size, price); // Pass the specific price instead of an array
                                 }}
                               >
-                                {length}
+                                {size}
                               </button>
                             </div>
                           })}
@@ -365,9 +376,35 @@ export default SingleProduct;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // import productStore from "../../components/products/products.json";
 // import { json, useParams } from "react-router-dom";
-// import { useState, useEffect, useContext } from "react";
+// import { useState, useEffect, useContext, useRef } from "react";
 // import Navbar from "../../components/navbar/Navbar";
 // import Footer from "../../components/footer/Footer";
 // import PageNotFound from "../pageNotFound/PageNotFound";
@@ -378,189 +415,126 @@ export default SingleProduct;
 // import { toast } from "react-toastify";
 // import { useNavigate } from "react-router-dom";
 // import { Link } from "react-router-dom";
+// import { useSingleProduct } from "./useSingleProduct";
 
 
 // const SingleProduct = () => {
-//   const navigate = useNavigate()
+//  const navigate = useNavigate();
 //   const { cartProducts, addToCart, updateCartItemLength } = useContext(CartContext);
 //   const { selectedCurrency, convertCurrency, currencySymbols } = useContext(CurrencyContext);
 //   let { productId } = useParams();
-//   // console.log(productId);
 
-//   const [product, setProduct] = useState({
-//     id: "",
-//     img: "",
-//     subImage1: "",
-//     subImage2: "",
-//     subImage3: "",
-//     name: "",
-//     description: "",
-//     category: "",
-//     // price: 0,
-//     pageNotFound: false
-//   });
-//   const [productPrices, setProductPrices] = useState([])
-//   const [loading, setLoading] = useState(true)
+//   const { product, productSizes, productPrices, isLoading, error, pageNotFound } = useSingleProduct(productId);
+// console.log(product)
+// console.log(productSizes)
+// console.log(productPrices)
+
 
 //   const [selectedImage, setSelectedImage] = useState(""); // State for the enlarged image
 
-//   const [lengthState, setLengthState] = useState({
-//     length: [],
-//     lengthPicked: ""
+//   const [sizeState, setSizeState] = useState({
+//     sizes: [],
+//     sizePicked: ""
 //   });
 
-//   // const lengthsOfHair = [
-//   //   12", 12", 12",
-//   //   14", 14", 14",
-//   //   16", 16", 16",
-//   //   18", 18", 18",
-//   //   20", 20", 20",
-//   //   22", 22", 22",
-//   //   24", 24", 24",
-//   //   26", 26", 26",
-//   //   28", 28", 28",
-//   // ];
-
-//   const [lengthsOfHair, setLengthsOfHair] = useState([])
 //   useEffect(() => {
-//     // setLoading(true)
-//     axios.get(${import.meta.env.VITE_BACKEND_URL}/get-single-product?productId=${productId}).then((feedback) => {
-//       console.log(feedback)
-//       if(feedback.data.code == "success"){
+//     console.log(product)
+//     if (productSizes.length > 0) {
+//       setSizeState({
+//         sizes: productSizes,
+//         sizePicked: productSizes[0]  // Default to first size
+//       });
+//     }
+//   }, [productPrices]);
 
-//         // Check if the data is a string and parse it if needed
-//         const productData = typeof feedback.data.data === "string" ? JSON.parse(feedback.data.data) : feedback.data.data;
-//         setLengthsOfHair([
-//           (parseFloat(productData.productPrice12Inches) > 0) ? '12", 12", 12"' : "",
-//           (parseFloat(productData.productPrice14Inches) > 0) ? '14", 14", 14"' : "",
-//           (parseFloat(productData.productPrice16Inches) > 0) ? '16", 16", 16"' : "",
-//           (parseFloat(productData.productPrice18Inches) > 0) ? '18", 18", 18"' : "",
-//           (parseFloat(productData.productPrice20Inches) > 0) ? '20", 20", 20"' : "",
-//           (parseFloat(productData.productPrice22Inches) > 0) ? '22", 22", 22"' : "",
-//           (parseFloat(productData.productPrice24Inches) > 0) ? '24", 24", 24"' : "",
-//           (parseFloat(productData.productPrice26Inches) > 0) ? '26", 26", 26"' : "",
-//           (parseFloat(productData.productPrice28Inches) > 0) ? '28", 28", 28"' : "",
-//         ].filter(Boolean));
+//   // useEffect(() => {
+//   //   if (product.pageNotFound) {
+//   //     navigate("/page-not-found");
+//   //   }
+//   // }, [product.pageNotFound, navigate]);
 
-      
-        
-//         setLoading(false)
-//         setProduct({
-//           id: feedback.data.data.id,
-//           img: feedback.data.data.productImage,
-//           subImage1: feedback.data.data.subImage1 !== "null" && feedback.data.data.subImage1,
-//           subImage2: feedback.data.data.subImage2 !== "null" && feedback.data.data.subImage2,
-//           subImage3: feedback.data.data.subImage3 !== "null" && feedback.data.data.subImage3,
-//           name: feedback.data.data.productName,
-//           category: feedback.data.data.category
-//           // price: feedback.data.data.productPrice,
-//         });
-//             //  Set lengthState with available lengths
-//             setLengthState({
-//               length: lengthsOfHair,
-//               lengthPicked: lengthsOfHair[0]  // Default to first length
-//             });
-//         // setProductPrices([feedback.data.data.productPrice12Inches, feedback.data.data.productPrice14Inches, 
-//         //   feedback.data.data.productPrice16Inches, feedback.data.data.productPrice18Inches, 
-//         //   feedback.data.data.productPrice20Inches, feedback.data.data.productPrice22Inches, 
-//         //   feedback.data.data.productPrice24Inches, feedback.data.data.productPrice26Inches, 
-//         //   feedback.data.data.productPrice28Inches])
-//         setProductPrices([parseFloat(productData.productPrice12Inches) > 0 && productData.productPrice12Inches, 
-//           parseFloat(productData.productPrice14Inches) > 0 && productData.productPrice14Inches, 
-//           parseFloat(productData.productPrice16Inches) > 0 && productData.productPrice16Inches,
-//           parseFloat(productData.productPrice18Inches) > 0 && productData.productPrice18Inches, 
-//           parseFloat(productData.productPrice20Inches) > 0 && productData.productPrice20Inches,
-//           parseFloat(productData.productPrice22Inches) > 0 && productData.productPrice22Inches, 
-//           parseFloat(productData.productPrice24Inches) > 0 && productData.productPrice24Inches,
-//           parseFloat(productData.productPrice26Inches) > 0 && productData.productPrice26Inches, 
-//           parseFloat(productData.productPrice28Inches) > 0 && productData.productPrice28Inches].filter(Boolean))
-  
-  
-      
-//         // setProduct((prevState) => ({
-//         //   ...prevState,
-//         //   pageNotFound: true
-//         // }));
 
-//       }else{
-//         setLoading(false)
-//         navigate("/page-not-found")
+//   useEffect(() => {
+//   if (!isLoading && pageNotFound) {
+//     navigate("/page-not-found");
+//   }
+// }, [pageNotFound, isLoading, navigate]);
+
+
+
+
+
+// //   useEffect(() => {
+// //   if (!isLoading && product.pageNotFound) {
+// //     navigate("/page-not-found");
+// //   }
+// // }, [product.pageNotFound, isLoading, navigate]);
+
+
+//   // Check localStorage cart to set picked size if present
+//   useEffect(() => {
+//     if (!product.id) return;
+//     const cartItems = JSON.parse(localStorage.getItem("cart_items")) || [];
+//     const cartItem = cartItems.find(item => item.id === product.id);
+//     if (cartItem && cartItem.pricePicked) {
+//       if (productPrices.includes(cartItem.pricePicked)) {
+//         setSizeState(prev => ({ ...prev, sizePicked: cartItem.sizePicked }));
+//       } else {
+//         setSizeState(prev => ({ ...prev, sizePicked: productSizes[0] || "" }));
 //       }
-
-//     })
-//   // }, [cartProducts.products]);
-//   }, [productId]);
-// console.log(lengthsOfHair)
-
-
+//     }
+//   }, [product.id, productPrices]);
 
 //   const handleAddToCart = () => {
-//     addToCart(product, lengthState.lengthPicked);
+//     addToCart(product, sizeState.sizePicked);
 //   };
 
-//   const handleLengthChange = (length, lengthPrice) => {
-//     setLengthState(prevState => ({ ...prevState, lengthPicked: length }));
-//     updateCartItemLength(product.id, length, lengthPrice); // Update length in cart
+// //   const prices = JSON.parse(product.productPrices);
+
+// // const smallestPrice = Math.min(
+// //   ...prices.map(p => Number(p.price))
+// // );
+
+// // console.log(smallestPrice); // 80000
+//   const handlesizeChange = (size, sizePrice) => {
+//     setSizeState(prevState => ({ ...prevState, sizePicked: size }));
+//     updateCartItemLength(product.id, size, sizePrice);
 //   };
 
 //   const handleImageClick = (img) => {
-//     setSelectedImage(img); // Update the enlarged image on click
+//     setSelectedImage(img);
 //   };
 
 //   const cartItems = JSON.parse(localStorage.getItem("cart_items")) || [];
-//   // const isRecentlyAdded = cartProducts.recentlyAddedProducts.includes(product.id);
-//   const inCart = cartItems.some(item => item.id == product.id);
+//   const inCart = cartItems.some(
+//     item => item.id === product.id && item.lengthPicked === sizeState.sizePicked
+//   );
 
+//   const currencySymbol = currencySymbols[selectedCurrency] || '';
 
-//     // Convert price based on selected currency
-//     // const convertedPrice = convertCurrency(product.price, selectedCurrency);
-//     const currencySymbol = currencySymbols[selectedCurrency] || '';
-//     const productImages = [
-//       product.img,
-//       ...(product.subImage1 ? [product.subImage1] : []),
-//       ...(product.subImage2 ? [product.subImage2] : []),
-//       ...(product.subImage3 ? [product.subImage3] : [])
-//     ];
+//   const productImages = [
+//     product.img,
+//     ...(product.subImage1 ? [product.subImage1] : []),
+//     ...(product.subImage2 ? [product.subImage2] : []),
+//     ...(product.subImage3 ? [product.subImage3] : [])
+//   ];
 
-//     const convertedPrice = convertCurrency(product.price, import.meta.env.VITE_CURRENCY_CODE, selectedCurrency);
-    
-//     useEffect(() => {
-//       const cartItems = JSON.parse(localStorage.getItem('cart_items')) || [];
-//       const cartItem = cartItems.find((item) => item.id == product.id);
-    
-//       // Log to see the cartItem from localStorage
-//       console.log('Cart item from localStorage:', cartItem);
-    
-//       if (cartItem && cartItem.lengthPicked) {
-//         console.log('Length picked from cart:', cartItem.lengthPicked);
-        
-//         // Ensure that the picked length exists in the available lengths of hair
-//         if (!lengthsOfHair.includes(cartItem.lengthPicked)) {
-//           setLengthState({
-//             length: lengthsOfHair,
-//             lengthPicked: lengthsOfHair[0], // Fallback to the first item
-//           });
-//         } else {
-//           // Set the state with the length picked from the cart
-//           setLengthState({
-//             length: lengthsOfHair,
-//             lengthPicked: cartItem.lengthPicked,
-//           });
-//         }
-//       } else {
-//         // If no cart item or length picked, fallback to the default first item
-//         setLengthState({
-//           length: lengthsOfHair,
-//           lengthPicked: lengthsOfHair[0] // Default to first length
-//         });
-//       }
-//     }, [product.id]);  // Ensure this runs on product change
-    
+//   const convertedPrice = convertCurrency(
+//     productPrices[productPrices.indexOf(sizeState.sizePicked)] || 0,
+//     import.meta.env.VITE_CURRENCY_CODE,
+//     selectedCurrency
+//   );
 
-//   // if(loading){
-//   //   return null
-//   // }
+//   // if (isLoading) return <p>Loading...</p>;
+// const preloadImage = (src)=> {
+//   const img = new Image();
+//   img.src = src
+// }
+//   useEffect(()=> {
+//     preloadImage(product.img)
+//   })
 
+// if (error) return <div><p>Error retrieving product.</p></div>;
 //   return (
 //     <div>
 //       {product.pageNotFound ? (
@@ -569,34 +543,66 @@ export default SingleProduct;
 //         <div>
 //           <Navbar />
 //           <section className="py-5" style={{ backgroundColor: "var(--bodyColor)", marginTop: "var(--marginAboveTop)" }}>
+
 //             {/* {cartProducts.productAddedToCartAnimation && (
 //               <div style={{ width: "100%", height: "50px", backgroundColor: "green", display: "flex", justifyContent: "center", alignItems: "center", color: "white", position: "fixed", top: "0", zIndex: "2" }}>
 //                 {cartProducts.addToCartAnimationMessage} 
 //               </div>
 //             )}
-//             {cartProducts.lengthUpdateMessage && (
+//             {cartProducts.sizeUpdateMessage && (
 //               <div style={{ width: "100%", height: "50px", backgroundColor: "green", display: "flex", justifyContent: "center", alignItems: "center", color: "white", position: "fixed", top: "0", zIndex: "2" }}>
-//                 {cartProducts.lengthUpdateMessage}
+//                 {cartProducts.sizeUpdateMessage}
 //               </div>
 //             )} */}
-//             <div className="container placeholder-glow">
+//             <div className="container">
 //               <div className="row gx-">
 //                 <aside className="col-lg-6">
-//                   {
-//                     loading ? <div className="placeholder col-9" style={{width: "100%", height: "500px"}}>
+//                   {/* <div style={{minHeight: "450px", backgroundColor: "#e3dadd"}}>
+//                     {
+//                       isLoading ? <div className="placeholder col-9" style={{width: "100%", height: "500px"}}>
+//                         </div>
+//                       : <div className="single-product-image-scroll-container">
+                      
+//                         {productImages.map((image, index) => (
+//                             <img
+//                                 key={index}
+//                                 src={image}
+//                                 alt={`Product Image ${index + 1}`}
+//                                 className="single-product-scrollable-image"
+//                             />
+//                         ))}
 //                       </div>
-//                      : <div className="single-product-image-scroll-container">
-                    
-//                      {productImages.map((image, index) => (
-//                          <img
-//                              key={index}
-//                              src={image}
-//                              alt={`Product Image ${index + 1}`}
-//                              className="single-product-scrollable-image"
-//                          />
-//                      ))}
-//                    </div>
-//                   }
+//                     }
+//                   </div> */}
+
+//                   <div style={{ minHeight: "450px", backgroundColor: "#e3dadd" }}>
+//   {
+//     isLoading ? (
+//       <div
+//         className="placeholder col-9"
+//         style={{ width: "100%", height: "500px" }}
+//       ></div>
+//     ) : (
+//         <div className="single-product-image-scroll-container">
+//         {productImages.map((image, index) => (
+//             <img
+//               key={index}
+//               src={image}
+//               alt={`Product Image ${index + 1}`}
+//               className="single-product-scrollable-image fade-in-image"
+//               style={{ opacity: 0}}
+//               onLoad={(e) => { e.target.style.opacity = 1; }}
+//             />
+//           ))}
+//            {/* Navigation Buttons */}
+  
+//         </div> 
+      
+//     )
+//   }
+// </div>
+
+
                   
                     
                   
@@ -604,67 +610,86 @@ export default SingleProduct;
 //                 </aside>
 //                 <main className="col-lg-6">
 //                   <div className="ps-lg-3">
-//                     {
-//                       loading ? <h4 className="placeholder w-100 mt-3" style={{height: "30px"}}></h4> :
-//                       <h4 className="title" style={{ fontSize: "30px", color: "black" }}>{product.name}</h4>
-//                     }
+//                     <div style={{minHeight: "30px"}}>
+//                       {
+//                       isLoading ? <h4 className="placeholder w-100 mt-3" style={{height: "30px"}}></h4> :
+//                       <h4 className="title mt-3" style={{ fontSize: "30px", color: "black"}}>{product.name}</h4>
+//                       }
+//                     </div>
                     
                     
                       
-//                       {
-//                         loading ? <div className="placeholder mt-3 w-50" style={{height: "30px"}}></div> :
-//                         <div className="d-flex flex-row my-3">
-//                           <div className="text-warning mb-1 me-2">
-//                             <i className="fa fa-star"></i>
-//                             <i className="fa fa-star"></i>
-//                             <i className="fa fa-star"></i>
-//                             <i className="fa fa-star"></i>
-//                             <i className="fa fa-star"></i>
+//                       <div style={{minHeight: "20px"}}>
+//                         {
+//                         isLoading ? <div className="placeholder mt-3 w-50" style={{height: "30px"}}></div> :
+//                           <div className="d-flex flex-row my-3">
+//                             <div className="text-warning mb-1 me-2">
+//                               <i className="fa fa-star"></i>
+//                               <i className="fa fa-star"></i>
+//                               <i className="fa fa-star"></i>
+//                               <i className="fa fa-star"></i>
+//                               <i className="fa fa-star"></i>
+//                             </div>
+//                             <span className="text-success ms-2 ml-3">In stock</span>
 //                           </div>
-//                           <span className="text-success ms-2 ml-3">In stock</span>
-//                         </div>
-//                       }
+//                         }
+//                       </div>
                     
                     
 
 
 //                         {/* <span><b>{convertedPrice.toLocaleString()}</b></span> */}
-
-//                     <div className="mb-3 d-flex">
+//                     <div className="mb-3 d-flex" style={{minHeight: "30px"}}>
 //                       {
-//                         loading ? <div className="placeholder mt-3" style={{width: "150px", height: "30px"}}></div> :
+//                         isLoading ? <div className="placeholder mt-3" style={{width: "150px", height: "30px"}}></div> :
 //                         <div style={{display: "flex"}}>
-//                           <div className="h5" style={{display: "flex"}}>
+//                           <div className="h5" style={{display: "flex", minWidth: "30px"}}>
+//                             <strong>
+//                               <mark>
 //                             <span>{currencySymbol}</span>
-//                             {console.log(lengthState)}
-//                             {lengthState.length.map((length, index) =>
-//                               lengthState.lengthPicked === length &&
-//                               convertCurrency(productPrices[index], import.meta.env.VITE_CURRENCY_CODE, selectedCurrency).toLocaleString()
-//                             )}
+                              
+//                             {sizeState.sizes.map((size, index) => {
+//                               if (sizeState.sizePicked === size) {
+//                                 console.log(product)
+//                                 const converted = convertCurrency(productPrices[index], import.meta.env.VITE_CURRENCY_CODE, selectedCurrency);
+
+//                                 return converted !== null ? converted.toLocaleString() : <span className='placeholder' style={{width: "30px", }}></span> ; // or show fallback
+//                               }
+//                               return null;
+//                             })}
+//                             </mark>
+//                             </strong>
+           
+
 //                           </div>
 //                           <span className="text-muted">&nbsp;/&nbsp;per item</span>
 
 //                         </div>
 //                       }
 //                     </div>
-//                     {!loading && <div className="text-muted mb-1">Category: {product?.category?.name}</div>}
-//                     {!loading && <div className="text-muted">LENGTH: {lengthState.lengthPicked}</div> }
-//                     <div className="row mt-2">
+//                     <div style={{minHeight: "50px"}}>
+//                       {isLoading ? <div className="placeholder" style={{width: "50%", height: "30px"}}></div> :
+//                       <div className="text-muted mb-2">Category: {product?.category?.name}</div>}
+//                       {!isLoading && <div className="text-muted">size: {sizeState.sizePicked}</div> }
                      
-//                         <div className="lengths-container">
-//                           {!loading && lengthState.length?.map((length, index) => {
-//                             console.log(lengthState)
+//                     </div>
+                          
+                          
+//                     <div className="row mt-2">
+//                         <div className="sizes-container">
+//                           {isLoading? <div className="placeholder mt-3" style={{width: "100%", height: "80px"}}></div>
+//                           : sizeState.sizes?.map((size, index) => {
 //                             return <div key={index} className="">
 //                               <button
-//                                 className="length-button "
-//                                 style={lengthState.lengthPicked === length ? { backgroundColor: "black", color: "white" } : null }
+//                                 className="size-button btn"
+//                                 style={sizeState.sizePicked === size ? { backgroundColor: "black", color: "white" } : null }
 //                                 onClick={() => {
-//                                   const index = lengthState.length.findIndex(item => item == length); // Find the index of the selected length
-//                                   const price = productPrices[index]; // Get the price for the selected length
-//                                   handleLengthChange(length, price); // Pass the specific price instead of an array
+//                                   const index = sizeState.sizes.findIndex(item => item == size); // Find the index of the selected size
+//                                   const price = productPrices[index]; // Get the price for the selected size
+//                                   handlesizeChange(size, price); // Pass the specific price instead of an array
 //                                 }}
 //                               >
-//                                 {length}
+//                                 {size}
 //                               </button>
 //                             </div>
 //                           })}
@@ -673,7 +698,7 @@ export default SingleProduct;
 //                     </div>
 //                     <hr />
 //                     {
-//                       loading ? <div className="placeholder w-100" style={{height: "50px"}}></div> : 
+//                       isLoading ? <div className="placeholder w-100" style={{height: "50px"}}></div> : 
 //                       (product.img && <div className="d-grid">
 //                         <button
 //                           className="btn hover-button"
@@ -729,6 +754,8 @@ export default SingleProduct;
 //       )}
 //     </div>
 //   );
-// }
+// };
 
-// export default SingleProduct
+// export default SingleProduct;
+
+

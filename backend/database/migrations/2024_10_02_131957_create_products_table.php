@@ -18,15 +18,8 @@ return new class extends Migration
             $table->string('subImage1')->nullable();
             $table->string('subImage2')->nullable();
             $table->string('subImage3')->nullable();
-            $table->decimal('productPriceInNaira12Inches', 10, 2)->nullable();
-            $table->decimal('productPriceInNaira14Inches', 10, 2)->nullable();
-            $table->decimal('productPriceInNaira16Inches', 10, 2)->nullable();
-            $table->decimal('productPriceInNaira18Inches', 10, 2)->nullable();
-            $table->decimal('productPriceInNaira20Inches', 10, 2)->nullable();
-            $table->decimal('productPriceInNaira22Inches', 10, 2)->nullable();
-            $table->decimal('productPriceInNaira24Inches', 10, 2)->nullable();
-            $table->decimal('productPriceInNaira26Inches', 10, 2)->nullable();
-            $table->decimal('productPriceInNaira28Inches', 10, 2)->nullable();
+            // NEW flexible price structure
+            $table->json('productPrices');
 
             $table->timestamps();
         });

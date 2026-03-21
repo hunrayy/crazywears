@@ -1,46 +1,268 @@
-.single-item-container :hover{
-    /* box-shadow: 2px 5px 10px 0px rgba(0, 0, 0, 0.459); */
-    /* border-radius: 5px; */
-    cursor: pointer;
+/* ===============================
+   MENU BUTTONS
+================================ */
+.product-menu-buttons {
+  display: flex;
+  gap: 1px;
+  margin-bottom: 1rem;
 }
 
-.product-image-cover{
-    position: relative;
-    background-color: #c7bec13e;
-    border-radius: 10px;
-    
+.menu-btn {
+  font-size: 13px;
+  flex: 1;
+  padding: 12px;
+  background-color: #fff;
+  color: #6c757d;
+  border: 0.1px solid #dddddd;
+  cursor: pointer;
+  transition: background 0.5s, color 0.5s;
+}
+
+.menu-btn:hover {
+  background-color: #222;
+  color: #fff;
+}
+
+/* ===============================
+   MENU OVERLAY & PANEL
+================================ */
+.menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: flex-end;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.7);
+  transition: opacity 0.3s;
+}
+
+.fade-in { opacity: 1; }
+.fade-out { opacity: 0; }
+
+.menu-panel {
+  width: 300px;
+  max-width: 80%;
+  height: 100%;
+  background: #fff;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.slide-in { animation: slideIn 0.3s forwards; }
+.slide-out { animation: slideOut 0.3s forwards; }
+
+@keyframes slideIn {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes slideOut {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(100%); }
+}
+
+.menu-item {
+  padding: 12px 8px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+  transition: background 0.2s;
+}
+
+.menu-item:hover { background: #f0f0f0; }
+
+.menu-item.active {
+  background: #000;
+  color: #fff;
+  font-weight: bold;
+}
+
+/* ===============================
+   PRODUCT CARD & IMAGE
+================================ */
+.product-card {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.product-image-cover {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  background-color: #c7bec13e;
+}
+
+.product-card img {
+  width: 100%;
+  display: block;
+  transition: transform 0.5s ease;
+}
+
+.product-card:hover img {
+  transform: scale(1.05);
+}
+
+/* ===============================
+   HOVER OVERLAY & BUTTONS
+================================ */
+/* .product-hover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+} */
+
+/* .product-hover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+
+  opacity: 0;
+  pointer-events: none; 
+  transition: opacity 0.35s ease;
+}
+
+.product-card:hover .product-hover-overlay,
+.product-hover-overlay.active {
+  opacity: 1;
+  pointer-events: all;
+} */
+
+
+
+.product-hover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+
+  opacity: 0;
+  pointer-events: none; 
+  transition: opacity 0.35s ease;
+}
+
+/* Desktop: show on hover */
+@media (hover: hover) and (pointer: fine) {
+  .product-card:hover .product-hover-overlay {
+    opacity: 1;
+    pointer-events: all;
+  }
+}
+
+/* Mobile: show when active class added */
+.product-hover-overlay.active {
+  opacity: 1;
+  pointer-events: all;
 }
 
 
-.product-image-carousel-cover{
-    position: absolute;
-    bottom: 20px;
-    right: 10px;
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    overflow: hidden;
-    /* box-shadow: 2px 2px 5px 0px rgba(0, 0, 0, 0.233); */
+
+/* .product-card:hover .product-hover-overlay {
+  opacity: 1;
+  pointer-events: all;   
+} */
+
+
+/* .product-card:hover .product-hover-overlay {
+  opacity: 1;
+  pointer-events: all;
+} */
+
+/* .product-card:hover .product-hover-overlay {
+  opacity: 1;
+} */
+
+/* .product-hover-overlay {
+  pointer-events: none;
+} */
+
+/* .product-hover-overlay:hover {
+  pointer-events: all;
+} */
+
+
+/* BUTTONS */
+.hover-btn {
+  min-width: 140px;
+  padding: 0.6rem 1.2rem;
+  font-size: 12px;
+  font-weight: 600;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.35s ease, transform 0.35s ease, background-color 0.2s ease;
 }
 
-
-.static-thumb {
-  animation: none !important;
-  opacity: 1 !important;
-  position: static !important;
+/* BUTTONS APPEAR WITH STAGGER */
+.product-card:hover .hover-btn {
+  opacity: 1;
+  transform: translateY(0);
 }
 
+.product-card:hover .hover-btn:nth-child(1) { transition-delay: 0.05s; }
+.product-card:hover .hover-btn:nth-child(2) { transition-delay: 0.15s; }
+.product-card:hover .hover-btn:nth-child(3) { transition-delay: 0.25s; }
 
+/* BUTTON HOVER BACKGROUND EFFECT */
+.hover-btn::before {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 0;
+  background-color: black;
+  z-index: -1;
+  transition: height 0.5s ease;
+}
 
+.hover-btn:hover::before {
+  height: 100%;
+}
 
+.hover-btn:hover {
+  color: white;
+  background-color: transparent;
+}
 
+/* BUTTON COLORS */
+.view-btn { background-color: #fff; color: #000; }
+.view-btn:hover { background-color: #f2f2f2; }
 
+.add-cart-btn { background-color: #fff; color: #000; }
 
-
-
-
-
-/* .product-image-carousel-cover {
+/* ===============================
+   IMAGE CAROUSEL
+================================ */
+.product-image-carousel-cover {
   position: absolute;
   bottom: 20px;
   right: 10px;
@@ -48,12 +270,8 @@
   height: 50px;
   border-radius: 50%;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #ffffff;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-} */
+}
+
 .carousel-thumb {
   position: absolute;
   width: 100%;
@@ -61,33 +279,17 @@
   object-fit: cover;
   border-radius: 50%;
   opacity: 0;
-  /* animation: fadeCarousel 12s infinite; */
   animation: fadeCarousel 18s infinite;
-
 }
 
-.carousel-thumb:nth-child(1) {
-  animation-delay: 0s;
-}
-.carousel-thumb:nth-child(2) {
-  animation-delay: 6s;
-}
-.carousel-thumb:nth-child(3) {
-  animation-delay: 12s;
-}
-
-/* @keyframes fadeCarousel {
-  0%   { opacity: 1; }
-  33.3% { opacity: 1; }
-  33.4% { opacity: 0; }
-  100%  { opacity: 0; }
-} */
+.carousel-thumb:nth-child(1) { animation-delay: 0s; }
+.carousel-thumb:nth-child(2) { animation-delay: 6s; }
+.carousel-thumb:nth-child(3) { animation-delay: 12s; }
 
 @keyframes fadeCarousel {
-  0%   { opacity: 0; z-index: 0; }
-  10%  { opacity: 1; z-index: 1; }   
-  30%  { opacity: 1; z-index: 1; }  
-  40%  { opacity: 0; z-index: 0; }  
+  0% { opacity: 0; z-index: 0; }
+  10% { opacity: 1; z-index: 1; }
+  30% { opacity: 1; z-index: 1; }
+  40% { opacity: 0; z-index: 0; }
   100% { opacity: 0; z-index: 0; }
-   
 }

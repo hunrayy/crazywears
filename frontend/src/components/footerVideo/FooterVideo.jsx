@@ -1,7 +1,7 @@
 
 
 
-import footerImage from "../../assets/footerImage.png"
+// import footerImage from "../../assets/footerImage.png"
 const FooterVideo = () => {
     return <div>
             <aside>

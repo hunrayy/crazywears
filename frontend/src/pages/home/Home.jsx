@@ -63,10 +63,10 @@ const Home = () => {
             </div>
             <div className="container mt-5" style={{display: "flex", justifyContent: "space-between"}}>
                 <p style={{fontSize: "18px"}}><strong>New Products</strong></p>
-                <Link to={'/collections/all/?category=All Products'} style={{color: "purple", textDecoration: "none"}}>View All</Link>
+                <Link to={'/collections/all'} style={{color: "purple", textDecoration: "none"}}>View All</Link>
             </div>
 
-            <Products productCategory='All Products' showPaginationButtons={showPaginationButtons} />
+            <Products productCategory='all' showPaginationButtons={showPaginationButtons} />
             <FooterVideo />
             <Footer />
         </div>

@@ -311,37 +311,27 @@ class ProductController extends Controller
     //     }
     // }
 
+
     public function createProduct(Request $request)
     {
-        // Step 1: Basic Validation (excluding the "at least one price" rule)
+        // Step 1: Decode prices if sent as JSON
+        $prices = json_decode($request->input('productPrices'), true);
 
-        $validator = Validator::make($request->all(), [
+        // Step 2: Validation
+        $validator = Validator::make([
+            'productImage' => $request->file('productImage'),
+            'productName' => $request->input('productName'),
+            'productCategory' => $request->input('productCategory'),
+            'productPrices' => $prices
+        ], [
             'productImage' => 'required|image|mimes:jpeg,png,jpg,gif',
             'productName' => 'required|string|max:255',
             'productCategory' => 'nullable|string|exists:products_category,name',
-            'productPrice12Inches' => 'nullable|numeric',
-            'productPrice14Inches' => 'nullable|numeric',
-            'productPrice16Inches' => 'nullable|numeric',
-            'productPrice18Inches' => 'nullable|numeric',
-            'productPrice20Inches' => 'nullable|numeric',
-            'productPrice22Inches' => 'nullable|numeric',
-            'productPrice24Inches' => 'nullable|numeric',
-            'productPrice26Inches' => 'nullable|numeric',
-            'productPrice28Inches' => 'nullable|numeric',
+            'productPrices' => 'required|array|min:1',
+            'productPrices.*.size' => 'required|string|max:100',
+            'productPrices.*.price' => 'required|numeric|min:0'
         ]);
 
-        // Step 2: Add custom validation after base validation
-        $validator->after(function ($validator) use ($request) {
-            $hasAtLeastOnePrice = collect($request->all())
-                ->filter(fn($value, $key) => str_starts_with($key, 'productPrice') && $value !== null && $value !== '')
-                ->isNotEmpty();
-
-            if (!$hasAtLeastOnePrice) {
-                $validator->errors()->add('productPrices', 'At least one product price is required.');
-            }
-        });
-
-        // Step 3: Handle validation failure
         if ($validator->fails()) {
             return response()->json([
                 'message' => 'Validation failed.',
@@ -351,8 +341,10 @@ class ProductController extends Controller
         }
 
         try {
-            // Step 4: Upload required main image
+
+            // Upload main image
             $uploadedProductImage = $this->uploadToCloudinary($request->file('productImage'));
+
             if (!$uploadedProductImage) {
                 return response()->json([
                     'code' => 'error',
@@ -360,71 +352,186 @@ class ProductController extends Controller
                 ]);
             }
 
-            // Step 5: Upload optional sub-images
+            // Upload optional images
             $uploadedSubImage1 = $request->hasFile('subImage1') ? $this->uploadToCloudinary($request->file('subImage1')) : null;
             $uploadedSubImage2 = $request->hasFile('subImage2') ? $this->uploadToCloudinary($request->file('subImage2')) : null;
             $uploadedSubImage3 = $request->hasFile('subImage3') ? $this->uploadToCloudinary($request->file('subImage3')) : null;
 
-            // Step 6: Get category ID if category is provided
+            // Get category ID
             $categoryId = null;
-            $categoryName = $request->input('productCategory');
-            if ($categoryName) {
-                $category = ProductsCategory::where('name', $categoryName)->first();
+
+            if ($request->productCategory) {
+
+                $category = ProductsCategory::where('name', $request->productCategory)->first();
+
                 if (!$category) {
                     return response()->json([
                         'code' => 'error',
-                        'message' => 'Product category does not exist, kindly use a valid category.'
+                        'message' => 'Product category does not exist.'
                     ]);
                 }
+
                 $categoryId = $category->id;
             }
 
-            // Step 7: Create product
+            // Create product
             $newProduct = Product::create([
-                'productName' => $request->input('productName'),
+                'productName' => $request->productName,
                 'productImage' => $uploadedProductImage,
                 'category_id' => $categoryId,
                 'subImage1' => $uploadedSubImage1,
                 'subImage2' => $uploadedSubImage2,
                 'subImage3' => $uploadedSubImage3,
-                'productPrice12Inches' => $request->input('productPrice12Inches'),
-                'productPrice14Inches' => $request->input('productPrice14Inches'),
-                'productPrice16Inches' => $request->input('productPrice16Inches'),
-                'productPrice18Inches' => $request->input('productPrice18Inches'),
-                'productPrice20Inches' => $request->input('productPrice20Inches'),
-                'productPrice22Inches' => $request->input('productPrice22Inches'),
-                'productPrice24Inches' => $request->input('productPrice24Inches'),
-                'productPrice26Inches' => $request->input('productPrice26Inches'),
-                'productPrice28Inches' => $request->input('productPrice28Inches'),
+
+                // Save sizes + prices as JSON
+                'productPrices' => json_encode($prices)
             ]);
 
-            // Step 8: Cache update
+            // Cache update
             $cachedProducts = Cache::get('allProducts');
+
             if ($cachedProducts) {
-                // $decoded = json_decode($cachedProducts, true);
-                // array_unshift($decoded, $newProduct->toArray());
+
                 array_unshift($cachedProducts, $newProduct->toArray());
-                // Cache::put('allProducts', json_encode($decoded), now()->addWeek());
-                Cache::put('allProducts', $cachedProducts, now()->addWeek(1));
+
+                Cache::put('allProducts', $cachedProducts, now()->addWeek());
+
             } else {
+
                 $allProducts = Product::orderBy('created_at', 'desc')->get()->toArray();
-                // Cache::put('allProducts', json_encode($allProducts), now()->addWeek());
-                Cache::put('allProducts', $allProducts, now()->addWeek(1));
+
+                Cache::put('allProducts', $allProducts, now()->addWeek());
             }
 
-            // Step 9: Response
             return response()->json([
                 'message' => 'Product created successfully.',
-                'code' => 'success',
+                'code' => 'success'
             ]);
+
         } catch (\Exception $e) {
+
             return response()->json([
                 'message' => 'Error creating product.',
                 'code' => 'error',
-                'reason' => $e->getMessage(),
+                'reason' => $e->getMessage()
             ]);
         }
     }
+
+    // public function createProduct(Request $request)
+    // {
+    //     // Step 1: Basic Validation (excluding the "at least one price" rule)
+
+    //     $validator = Validator::make($request->all(), [
+    //         'productImage' => 'required|image|mimes:jpeg,png,jpg,gif',
+    //         'productName' => 'required|string|max:255',
+    //         'productCategory' => 'nullable|string|exists:products_category,name',
+    //         'productPrice12Inches' => 'nullable|numeric',
+    //         'productPrice14Inches' => 'nullable|numeric',
+    //         'productPrice16Inches' => 'nullable|numeric',
+    //         'productPrice18Inches' => 'nullable|numeric',
+    //         'productPrice20Inches' => 'nullable|numeric',
+    //         'productPrice22Inches' => 'nullable|numeric',
+    //         'productPrice24Inches' => 'nullable|numeric',
+    //         'productPrice26Inches' => 'nullable|numeric',
+    //         'productPrice28Inches' => 'nullable|numeric',
+    //     ]);
+
+    //     // Step 2: Add custom validation after base validation
+    //     $validator->after(function ($validator) use ($request) {
+    //         $hasAtLeastOnePrice = collect($request->all())
+    //             ->filter(fn($value, $key) => str_starts_with($key, 'productPrice') && $value !== null && $value !== '')
+    //             ->isNotEmpty();
+
+    //         if (!$hasAtLeastOnePrice) {
+    //             $validator->errors()->add('productPrices', 'At least one product price is required.');
+    //         }
+    //     });
+
+    //     // Step 3: Handle validation failure
+    //     if ($validator->fails()) {
+    //         return response()->json([
+    //             'message' => 'Validation failed.',
+    //             'code' => 'error',
+    //             'errors' => $validator->errors()
+    //         ]);
+    //     }
+
+    //     try {
+    //         // Step 4: Upload required main image
+    //         $uploadedProductImage = $this->uploadToCloudinary($request->file('productImage'));
+    //         if (!$uploadedProductImage) {
+    //             return response()->json([
+    //                 'code' => 'error',
+    //                 'message' => 'Failed to upload the main product image.'
+    //             ]);
+    //         }
+
+    //         // Step 5: Upload optional sub-images
+    //         $uploadedSubImage1 = $request->hasFile('subImage1') ? $this->uploadToCloudinary($request->file('subImage1')) : null;
+    //         $uploadedSubImage2 = $request->hasFile('subImage2') ? $this->uploadToCloudinary($request->file('subImage2')) : null;
+    //         $uploadedSubImage3 = $request->hasFile('subImage3') ? $this->uploadToCloudinary($request->file('subImage3')) : null;
+
+    //         // Step 6: Get category ID if category is provided
+    //         $categoryId = null;
+    //         $categoryName = $request->input('productCategory');
+    //         if ($categoryName) {
+    //             $category = ProductsCategory::where('name', $categoryName)->first();
+    //             if (!$category) {
+    //                 return response()->json([
+    //                     'code' => 'error',
+    //                     'message' => 'Product category does not exist, kindly use a valid category.'
+    //                 ]);
+    //             }
+    //             $categoryId = $category->id;
+    //         }
+
+    //         // Step 7: Create product
+    //         $newProduct = Product::create([
+    //             'productName' => $request->input('productName'),
+    //             'productImage' => $uploadedProductImage,
+    //             'category_id' => $categoryId,
+    //             'subImage1' => $uploadedSubImage1,
+    //             'subImage2' => $uploadedSubImage2,
+    //             'subImage3' => $uploadedSubImage3,
+    //             'productPrice12Inches' => $request->input('productPrice12Inches'),
+    //             'productPrice14Inches' => $request->input('productPrice14Inches'),
+    //             'productPrice16Inches' => $request->input('productPrice16Inches'),
+    //             'productPrice18Inches' => $request->input('productPrice18Inches'),
+    //             'productPrice20Inches' => $request->input('productPrice20Inches'),
+    //             'productPrice22Inches' => $request->input('productPrice22Inches'),
+    //             'productPrice24Inches' => $request->input('productPrice24Inches'),
+    //             'productPrice26Inches' => $request->input('productPrice26Inches'),
+    //             'productPrice28Inches' => $request->input('productPrice28Inches'),
+    //         ]);
+
+    //         // Step 8: Cache update
+    //         $cachedProducts = Cache::get('allProducts');
+    //         if ($cachedProducts) {
+    //             // $decoded = json_decode($cachedProducts, true);
+    //             // array_unshift($decoded, $newProduct->toArray());
+    //             array_unshift($cachedProducts, $newProduct->toArray());
+    //             // Cache::put('allProducts', json_encode($decoded), now()->addWeek());
+    //             Cache::put('allProducts', $cachedProducts, now()->addWeek(1));
+    //         } else {
+    //             $allProducts = Product::orderBy('created_at', 'desc')->get()->toArray();
+    //             // Cache::put('allProducts', json_encode($allProducts), now()->addWeek());
+    //             Cache::put('allProducts', $allProducts, now()->addWeek(1));
+    //         }
+
+    //         // Step 9: Response
+    //         return response()->json([
+    //             'message' => 'Product created successfully.',
+    //             'code' => 'success',
+    //         ]);
+    //     } catch (\Exception $e) {
+    //         return response()->json([
+    //             'message' => 'Error creating product.',
+    //             'code' => 'error',
+    //             'reason' => $e->getMessage(),
+    //         ]);
+    //     }
+    // }
 
 
 
@@ -642,9 +749,10 @@ class ProductController extends Controller
         $category = $request->query('productCategory');
         $page = (int) $request->query('page', 1);
         $perPage = (int) $request->query('perPage', 12);
+        // return $category;
 
-        // ====> Handle "All products"
-        if (strtolower($category) === "all products") {
+        // ====> Handle "all"
+        if (strtolower($category) === "all") {
             // Force result into a collection to avoid "slice on string" error
             $allProducts = collect(Cache::remember('allProducts', now()->addMinutes(10), function () {
                 return Product::orderBy('created_at', 'desc')->get()->toArray();

@@ -4,13 +4,20 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  --bodyColor: #f9eef1;
+  /* --bodyColor: #f9eef1; */
+
   --marginAboveTop: 100px;
   --lightColorSkeletonPlaceholder: #c7bec1;
   /* font-family: 'EB Garamond', serif; */
   font-family: 'Crimson Text', serif;
   /* font-family: Poppins, Arial, Helvetica, sans-serif; */
   font-family: Lato, Arial, Helvetica, sans-serif;
+}
+
+mark {
+  background-color: rgba(255, 255, 0, 0.158); /* light transparent yellow */
+  padding: 0 5px; /* optional: add some spacing */
+  border-radius: 2px; /* optional: make it slightly rounded */
 }
 
 /* *{

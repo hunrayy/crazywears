@@ -56,6 +56,7 @@ useEffect(() => {
     queryKey: ['exchangeRates'],
     queryFn: async () => {
       const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/fetch-exchange-rate`);
+      console.log(response)
       return response.data.rates;
     },
     staleTime: 1000 * 60 * 30, // 30 minutes

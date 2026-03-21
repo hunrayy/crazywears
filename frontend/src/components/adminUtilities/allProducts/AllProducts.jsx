@@ -145,7 +145,7 @@ const AllProducts = ({ productCategory }) => {
 
     useEffect(() => {
         if (!productCategory) {
-            productCategory = 'all productsy'; // or default category
+            productCategory = 'all'; // or default category
         }
         fetchProducts()
         // let loaderTimeout;
@@ -274,7 +274,14 @@ const AllProducts = ({ productCategory }) => {
                     <div className="row">
                         {allProducts.products_loading && <BasicLoader />}
                         {allProducts.products?.map((product) => {
-                            // console.log(product)
+                            console.log(product)
+
+
+                            console.log(JSON.parse(product.productPrices)[0])
+                            const prices = product.productPrices.map(p => Number(p.price)); // [80000, 100000, 120000]
+                            const minPrice = Math.min(...prices); // 80000
+
+                            
                             const sizes = [];
                             // Iterate through all keys of the 'product' object
                             Object.keys(product).forEach(key => {
@@ -285,6 +292,9 @@ const AllProducts = ({ productCategory }) => {
                             });
                             
                             const firstAvailablePrice = sizes.map(size => product[size]).find(price => price > 0) || 0;
+                            // const firstAvailablePrice = JSON.parse(JSON.parse(product.productPrices[0])) || 0
+                            // console.log(firstAvailablePrice)
+                            // const productPrice = parseFloat(firstAvailablePrice);
                             const productPrice = parseFloat(firstAvailablePrice);
                             console.log(import.meta.env.VITE_CURRENCY_CODE)
                             const convertedPrice = convertCurrency(productPrice, import.meta.env.VITE_CURRENCY_CODE, selectedCurrency);
@@ -323,6 +333,7 @@ const AllProducts = ({ productCategory }) => {
                                                 <span>{currencySymbol}</span>
                                                 <span>{convertedPrice.toLocaleString()}</span>
                                             </h5>
+                                            
                                             <p className="mb-0">{product.productName}</p>
                                             {/* <p className="text-muted">{product.productDescription}</p> */}
                                         </div>

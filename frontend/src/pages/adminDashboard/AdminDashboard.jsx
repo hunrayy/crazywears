@@ -457,7 +457,7 @@ const AdminDashboard = () => {
                             )}
                             </div>
                             <div className={`admin-sidebar-dropdown-wrapper ${activeDropdown === "products" ? "open" : ""}`}>
-                            <div onClick={() => showPage("viewProducts", "all products")}>All products</div>
+                            <div onClick={() => showPage("viewProducts")}>All products</div>
                             {categories.options &&
                                 categories.options.map((category, index) => (
                                 <div key={index} onClick={() => showPage("viewProducts", category.label)}>

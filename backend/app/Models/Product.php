@@ -17,15 +17,7 @@ class Product extends Model
         'subImage1',
         'subImage2',
         'subImage3',
-        'productPrice12Inches',
-        'productPrice14Inches',
-        'productPrice16Inches',
-        'productPrice18Inches',
-        'productPrice20Inches',
-        'productPrice22Inches',
-        'productPrice24Inches',
-        'productPrice26Inches',
-        'productPrice28Inches',
+        'productPrices'
     ];
     
 

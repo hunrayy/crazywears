@@ -150,7 +150,7 @@ function App() {
         <CartProvider>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/collections/all" element={<AllProducts />} />
+            <Route path="/collections/:category" element={<AllProducts />} />
             <Route path="/product/:productId" element={<SingleProduct />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/products/checkout" element={<CheckOut />} />
@@ -166,7 +166,7 @@ function App() {
             <Route path="/pages/contact" element={<ContactUs />} />
             <Route path="/policies/:policy" element={<Policies />} />
             <Route path="/beautybykiara/admin/dashboard/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqb2huc21pdGhAZ21haWwuY29tIjoiam9obnNtaXRoQGdtYWlsLmNvbSIsImpvaG4iOiJqb2hu" element={<AdminDashboard />} />
-            <Route path="/beautybykiara/waterfall/admin/login" element={<AdminLogin />} />
+            <Route path="/crazywears/waterfall/admin/login" element={<AdminLogin />} />
             <Route path="/accounts/password/reset/admin/eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmaXJzdG5hbWUiOiJIZW5yeSIsImxhc3RuY" element={<AdminForgotPassword />} />
             <Route path="/admin/accounts/password/reset/reset-password/:token" element={<AdminResetPassword />} />
             <Route path="/page-not-found" element={<PageNotFound />} />

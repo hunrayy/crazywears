@@ -19,11 +19,11 @@ export const useSingleProduct = (productId) => {
     keepPreviousData: true,
   });
 
-  const { product, lengthsOfHair, productPrices, pageNotFound } = useMemo(() => {
+  const { product, productSizes, productPrices, pageNotFound } = useMemo(() => {
     if (!data || data.code !== "success") {
       return {
         product: {},
-        lengthsOfHair: [],
+        productSizes: [],
         productPrices: [],
         pageNotFound: true,
       };
@@ -31,17 +31,11 @@ export const useSingleProduct = (productId) => {
 
     const productData = typeof data.data === "string" ? JSON.parse(data.data) : data.data;
 
-    const lengths = [
-      { label: '12", 12", 12"', price: productData.productPrice12Inches },
-      { label: '14", 14", 14"', price: productData.productPrice14Inches },
-      { label: '16", 16", 16"', price: productData.productPrice16Inches },
-      { label: '18", 18", 18",', price: productData.productPrice18Inches },
-      { label: '20", 20", 20"', price: productData.productPrice20Inches },
-      { label: '22", 22", 22"', price: productData.productPrice22Inches },
-      { label: '24", 24", 24"', price: productData.productPrice24Inches },
-      { label: '26", 26", 26"', price: productData.productPrice26Inches },
-      { label: '28", 28", 28"', price: productData.productPrice28Inches },
-    ].filter(item => parseFloat(item.price) > 0);
+    const sizes = JSON.parse(productData.productPrices).filter(item => parseFloat(item.price) > 0);
+    console.log(sizes)
+        console.log(sizes.map(item => item.price))
+
+    
 
     return {
       product: {
@@ -51,16 +45,17 @@ export const useSingleProduct = (productId) => {
         subImage2: productData.subImage2 !== "null" ? productData.subImage2 : "",
         subImage3: productData.subImage3 !== "null" ? productData.subImage3 : "",
         name: productData.productName,
+        productPricesArray: JSON.parse(productData.productPrices),
         category: productData.category,
         pageNotFound: false,
       },
-      lengthsOfHair: lengths.map(item => item.label),
-      productPrices: lengths.map(item => item.price),
+      productSizes: sizes.map(item => item.size),
+      productPrices: sizes.map(item => (item.price)),
       pageNotFound: false,
     };
   }, [data]);
 
-  return { product, lengthsOfHair, productPrices, isLoading, error, pageNotFound };
+  return { product, productSizes, productPrices, isLoading, error, pageNotFound };
 };
 
 
