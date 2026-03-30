@@ -289,9 +289,9 @@ class AuthController extends Controller
             $payload = [
                 'id' => $user->id,
                 'email' => $user->email,
-                'password' => $user->password
             ];
-            $token = $this->createToken($payload, 20 * 86400);
+            $token = $this->createToken($payload, 1 * 86400);
+                // 'password' => $user->password
             
             return response()->json([
                 'message' => 'Login success',

@@ -111,41 +111,7 @@
 /* ===============================
    HOVER OVERLAY & BUTTONS
 ================================ */
-/* .product-hover-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 1;
 
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.35s ease;
-} */
-
-/* .product-hover-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.55);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  z-index: 2;
-
-  opacity: 0;
-  pointer-events: none; 
-  transition: opacity 0.35s ease;
-}
-
-.product-card:hover .product-hover-overlay,
-.product-hover-overlay.active {
-  opacity: 1;
-  pointer-events: all;
-} */
 
 
 
@@ -177,31 +143,6 @@
   opacity: 1;
   pointer-events: all;
 }
-
-
-
-/* .product-card:hover .product-hover-overlay {
-  opacity: 1;
-  pointer-events: all;   
-} */
-
-
-/* .product-card:hover .product-hover-overlay {
-  opacity: 1;
-  pointer-events: all;
-} */
-
-/* .product-card:hover .product-hover-overlay {
-  opacity: 1;
-} */
-
-/* .product-hover-overlay {
-  pointer-events: none;
-} */
-
-/* .product-hover-overlay:hover {
-  pointer-events: all;
-} */
 
 
 /* BUTTONS */

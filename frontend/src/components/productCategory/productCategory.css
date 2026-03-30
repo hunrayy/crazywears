@@ -1,3 +1,4 @@
+
 .product-category-skeleton-loader {
   background-color: #c7bec15f;
   width: 100%;
@@ -8,7 +9,7 @@
   align-items: center;
 }
 .product-category-skeleton-loader-text {
-  color: white;
+  color: gray;
 }
 
 .product-category-carousel {

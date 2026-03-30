@@ -289,7 +289,9 @@ import "./adminDashboard.css";
 import AdminHeader from "../../components/adminUtilities/adminHeader/AdminHeader";
 import Dashboard from "../../components/adminUtilities/dashboard/Dashboard";
 import CreateProduct from "../../components/adminUtilities/createProduct/CreateProduct";
-import AllProducts from "../../components/adminUtilities/allProducts/AllProducts";
+// import AllProducts from "../../components/adminUtilities/allProducts/AllProducts";
+import Products from "../../components/products/Products";
+// import EditProductForm from "../../components/adminUtilities/editProductForm/EditProductForm";
 import AdminNotification from "../../components/adminUtilities/adminNotification/AdminNotification";
 import AdminSettingsPage from "../../components/adminUtilities/adminSettings/AdminSettingsPage";
 import AdminPolicyPage from "../../components/adminUtilities/adminPolicyPage/AdminPolicyPage";
@@ -317,6 +319,7 @@ const AdminDashboard = () => {
         dashboard_page: true,
         createProduct_page: false,
         viewProducts_page: false,
+        // editProduct_page: false,
         settings_page: false,
         notifications_page: false,
         shipping_policy_page: false,
@@ -340,11 +343,12 @@ const AdminDashboard = () => {
 
     const [policyPage, setPolicyPage] = useState(null)
     const showPage = (page, productCategory) => {
-    // const showPage = (page) => {
+        // const showPage = (page) => {
         setPages({
             dashboard_page: page === 'dashboard',
             createProduct_page: page === 'createProduct',
             viewProducts_page: page === 'viewProducts',
+            // editProduct_page: page === 'editProduct',
             settings_page: page === 'settings',
             notifications_page: page === 'notifications',
             shipping_policy_page: page === 'shippingPolicy',
@@ -361,21 +365,11 @@ const AdminDashboard = () => {
             setPolicyPage(page);
         }
         
-        // if (page === "viewProducts") {
-        //     setSelectedCategory(extra || null);
-        // } else {
-        //     setSelectedCategory(null);
-        // }
-        
-        // if (page === "view_users") {
-        //     setViewingUserType(extra); // could be "users" or "admins"
-        //     // console.log(viewingUserType)
-        // }
+
         if (productCategory) {
-            // Update the selected category when the page is changed
             setSelectedCategory(productCategory);
-        }else{
-            setSelectedCategory(null);
+        } else {
+            setSelectedCategory('all'); // ← runs
         }
         setShownav(false);  // Close the sidebar when a page is selected
     };
@@ -394,42 +388,7 @@ const AdminDashboard = () => {
             }
         })
     }, [])
-
-    useEffect(()=> {
-        axios.get(`${import.meta.env.VITE_BACKEND_URL}/fetch-product-categories`).then((feedback) => {
-            console.log(feedback)
-            if(feedback.data.code == 'error'){
-                setCategories({
-                    loading: false,
-                    options: []
-                })
-                toast.error(`An error occured while fetching product categories: ${feedback.data.message}`)
-            }else if(feedback.data.code == 'success'){
-                // console.log(feedback)
-                const categoryOptions = feedback.data.data.map(category => ({
-                    value: category.id,  // Use the id as the value
-                    label: category.name  // Use the name as the label
-                }));
-                setCategories({
-                    loading: false,
-                    options: categoryOptions
-                })
-            }else{
-                setCategories({
-                    loading: false,
-                    options: []
-                })
-                toast.error('An error occured while retrieving product categories')
-            }
-        })
-    }, [])
-    
-
-    const [categories, setCategories] = useState({
-        loading: true,
-        options: []
-    });
-    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedCategory, setSelectedCategory] = useState('all');
 
     return (
         <div>
@@ -447,23 +406,8 @@ const AdminDashboard = () => {
                             <i className="fa-solid fa-plus"></i> <span>Create product</span>
                         </div>
                         <div>
-                            <div className="admin-sidebar-icon-wrapper" onClick={() => toggleDropdown("products")}>
-                            <i className="fa-solid fa-eye"></i>
-                            <span>View products</span>
-                            {activeDropdown === "products" ? (
-                                <i className="fa-solid fa-caret-up"></i>
-                            ) : (
-                                <i className="fa-solid fa-caret-down"></i>
-                            )}
-                            </div>
-                            <div className={`admin-sidebar-dropdown-wrapper ${activeDropdown === "products" ? "open" : ""}`}>
-                            <div onClick={() => showPage("viewProducts")}>All products</div>
-                            {categories.options &&
-                                categories.options.map((category, index) => (
-                                <div key={index} onClick={() => showPage("viewProducts", category.label)}>
-                                    {category.label}
-                                </div>
-                                ))}
+                            <div className="admin-sidebar-icon-wrapper" onClick={() => showPage("viewProducts")}>
+                                <i className="fa-solid fa-eye"></i> <span>View products</span>
                             </div>
                         </div>
                        
@@ -540,7 +484,8 @@ const AdminDashboard = () => {
                 <div className="admin-dashboard-content">
                     {pages.dashboard_page && <Dashboard />}
                     {pages.createProduct_page && <CreateProduct />}
-                    {pages.viewProducts_page && <AllProducts productCategory={selectedCategory} />}
+                    {pages.viewProducts_page && <Products productCategory={selectedCategory} setProductCategory={setSelectedCategory} showPaginationButtons={true} isAdmin={true} showPage={showPage} />}
+                    {/* {pages.editProduct_page && <EditProductForm />} */}
                     {pages.notifications_page && <AdminNotification />}
                     {(pages.shipping_policy_page || pages.delivery_policy_page || pages.refund_policy_page)  && <AdminPolicyPage key={policyPage} policyPage={policyPage} />}
                     {/* {pages.refund_policy_page && <AdminRefundPolicy />} */}
