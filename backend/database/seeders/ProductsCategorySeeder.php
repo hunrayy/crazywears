@@ -25,11 +25,8 @@ class ProductsCategorySeeder extends Seeder
                 ];
 
                 foreach ($categories as $category) {
-                    // Convert category name to folder-friendly format
-                    $categoryFolder = strtolower(str_replace(' ', '-', $category['name']));
-
                     // Build the full Cloudinary folder path
-                    $folderPath = env('FOLDER_FOR_IMAGES_IN_CLOUDINARY') . "/productCategory/{$categoryFolder}";
+                    $folderPath = env('FOLDER_FOR_IMAGES_IN_CLOUDINARY') . "/productCategory";
 
                     // Get the correct full image path
                     $imagePath = public_path('images/' . $category['image']);
@@ -48,7 +45,7 @@ class ProductsCategorySeeder extends Seeder
 
                         try {
                             // Delete the existing image from Cloudinary
-                            Cloudinary::destroy("productCategory/{$categoryFolder}/{$publicId}");
+                            Cloudinary::destroy( env('FOLDER_FOR_IMAGES_IN_CLOUDINARY') . "/productCategory/{$publicId}");
                         } catch (\Exception $e) {
                             Log::error("Error deleting image from Cloudinary: " . $e->getMessage());
                         }

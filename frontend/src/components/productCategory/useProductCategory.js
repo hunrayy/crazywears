@@ -5,6 +5,7 @@ import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 
 const token = Cookies.get("authToken");
+// console.log(token)
 const backend = import.meta.env.VITE_BACKEND_URL;
 
 const useProductCategory = () => {
@@ -82,6 +83,7 @@ const useProductCategory = () => {
           "Content-Type": "multipart/form-data"
         }
       });
+      console.log(token)
       console.log(res)
       if (res.data.code !== "success") throw new Error(res.data.message);
     },

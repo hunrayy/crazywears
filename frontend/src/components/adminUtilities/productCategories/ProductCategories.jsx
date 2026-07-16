@@ -39,8 +39,8 @@ const ProductCategories = () => {
         return (
           <div key={index} className="each-product-category">
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              <div style={{ width: "60px", height: "70px", backgroundColor: "#e0e0e0", borderRadius: "5px", overflow: "hidden" }}>
-                <img src={webpImageUrl} alt={category.name} width="60" height="70" loading="eager" style={{ objectFit: "cover", display: "block" }} />
+              <div style={{ width: "70px", height: "90px", backgroundColor: "#e0e0e0", borderRadius: "5px", overflow: "hidden" }}>
+                <img src={webpImageUrl} alt={category.name} width="100%" height="100%" loading="eager" style={{ objectFit: "cover", display: "block" }} />
               </div>
               <p>{category.name}</p>
             </div>

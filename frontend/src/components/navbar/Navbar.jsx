@@ -6,11 +6,14 @@ import { Link, useNavigate, useLocation } from "react-router-dom"; // 👈 added
 import { useContext } from "react";
 import { CartContext } from "../../pages/cart/CartContext";
 
+import { useAuth } from "../AuthContext/AuthContext";
+
 export default function Nav() {
   const navigate = useNavigate();
   const location = useLocation(); // 👈 get current route
   const [menuOpen, setMenuOpen] = useState(false);
   const {cartCount} = useContext(CartContext)
+  const use_auth = useAuth()
 
   const topNavItems = navItems.filter(item =>
     ["SEARCH"].includes(item.name)
@@ -35,6 +38,10 @@ export default function Nav() {
       document.body.classList.remove("no-scroll");
     }
   }, [menuOpen]);
+
+  useEffect(()=> {
+    console.log(use_auth.user.is_user_logged)
+  }, [])
 
   return (
     <>
@@ -94,7 +101,25 @@ export default function Nav() {
               </Link>
             </li>
           ))}
+          {/* <li>
+          </li> */}
         </ul>
+        {use_auth.user?.is_user_logged ? (
+          <button
+            className="mobile-menu-link btn btn-danger logout-btn"
+            onClick={() => use_auth.logoutUser()}
+          >
+            Logout
+          </button>
+        ) : (
+          <Link
+            to="/login"
+            className="mobile-menu-link btn btn-dark logout-btn"
+            onClick={() => setMenuOpen(false)}
+          >
+            Login
+          </Link>
+        )}
       </nav>
 
       {/* Mobile Bottom Nav */}

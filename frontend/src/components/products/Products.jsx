@@ -16,6 +16,7 @@ import EditProductForm from '../adminUtilities/editProductForm/EditProductForm';
 const Products = ({ productCategory, setProductCategory, showPaginationButtons, isAdmin, showPage }) => {
   console.log(isAdmin)
   console.log(productCategory)
+  const navigate = useNavigate()
   const {
     totalProducts,
     isLoading,
@@ -56,6 +57,7 @@ const Products = ({ productCategory, setProductCategory, showPaginationButtons, 
   } = userUseProductsHook(productCategory, setProductCategory, isAdmin);
 
   if(isAdmin && showEditProductForm && selectedProduct){
+    console.log(selectedProduct)
     return <EditProductForm 
       product={selectedProduct}
       onClose={() => {setSelectedProduct(null), setShowEditProductForm(false)}}
@@ -90,7 +92,10 @@ const Products = ({ productCategory, setProductCategory, showPaginationButtons, 
             {isError && <p className="text-danger">Error loading products: {error.message}</p>}
 
             {totalProducts?.data?.map((product, index) => {
-              const prices = JSON.parse(product.productPrices);
+              console.log(product)
+              const prices = typeof product.productPrices === "string"
+                ? JSON.parse(product.productPrices)
+                : product.productPrices;
 
               const smallestPrice = Math.min(
                 ...prices.map(p => Number(p.price))
@@ -100,7 +105,8 @@ const Products = ({ productCategory, setProductCategory, showPaginationButtons, 
               const converted = convertCurrency(smallestPrice, import.meta.env.VITE_CURRENCY_CODE, selectedCurrency);
               const convertedPrice = Number(converted ?? smallestPrice);
               const currencySymbol = currencySymbols[selectedCurrency];
-              const productImagesArray = [product.productImage, product.subImage1, product.subImage2, product.subImage3];
+              const subImages = typeof product.subMedia === "string" ? (product.subMedia ? JSON.parse(product.subMedia) : []) : product.subMedia;
+              const productImagesArray = [product.mainProductMedia, ...subImages];
 
               return (
                 <div key={index} className="col-lg-3 col-md-6 col-sm-6 col-6 single-item-container">
@@ -109,7 +115,7 @@ const Products = ({ productCategory, setProductCategory, showPaginationButtons, 
                   >
                     <div className="product-image-cover position-relative">
                       <img
-                        src={product.productImage}
+                        src={product.mainProductMedia}
                         className="card-img-top rounded-2 fade-in-image"
                         style={{ aspectRatio: "3 / 4", width: "100%", height: "auto", opacity: 0, filter: "grayscale(100%)" }}
                         alt={product.productName}
@@ -122,16 +128,17 @@ const Products = ({ productCategory, setProductCategory, showPaginationButtons, 
                         className="product-hover-overlay d-flex flex-column justify-content-center align-items-center"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <button className="hover-btn view-btn mb-2" onClick={() => isAdmin ? (setSelectedProduct(product), setShowEditProductForm(true)) : navigateToProduct(product.id)}>{isAdmin ? "Edit Product" : "View Product"}</button>
+                        <button className="hover-btn view-btn mb-2" onClick={(e) => { e.stopPropagation(); isAdmin ? (setSelectedProduct(product), console.log(selectedProduct), setShowEditProductForm(true)) : navigateToProduct(product.id)}}>{isAdmin ? "Edit Product" : "View Product"}</button>
                         {/* <button className="hover-btn add-cart-btn" onClick={() => addToCart(product)}>Add to Cart</button> */}
                         <button
                           className="hover-btn add-cart-btn"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation();
                             if (isAnyVariantInCart(product.id)) {
                               navigate("/cart");
                             } else {
                               // --- Find the smallest priced variant ---
-                              const prices = JSON.parse(product.productPrices);
+                              const prices = typeof (product.productPrices) == 'string' ? JSON.parse(product.productPrices) : product.productPrices;
                               const smallestVariant = prices.reduce((prev, curr) =>
                                 Number(curr.price) < Number(prev.price) ? curr : prev
                               , prices[0]);
@@ -142,6 +149,7 @@ const Products = ({ productCategory, setProductCategory, showPaginationButtons, 
 
                               // Add product with variant (without price) to cart
                               addToCart(product, variantWithoutPrice);
+                      
                             }
                           }}
                         >

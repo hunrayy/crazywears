@@ -6,28 +6,32 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('products', function (Blueprint $table) {
+
             $table->uuid('id')->primary();
+
+            // Product core
             $table->string('productName')->index();
-            $table->text('productImage');
-            $table->string('subImage1')->nullable();
-            $table->string('subImage2')->nullable();
-            $table->string('subImage3')->nullable();
-            // NEW flexible price structure
+            $table->text('mainProductMedia'); // image or video URL
+
+            // Category relationship
+            $table->foreignId('category_id')
+                  ->nullable()
+                  ->constrained('products_category')
+                  ->nullOnDelete();
+
+            // Flexible media
+            $table->json('subMedia')->nullable();
+
+            // Flexible pricing
             $table->json('productPrices');
 
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('products');

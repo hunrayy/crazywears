@@ -163,7 +163,7 @@ function App() {
             <Route path="/user-account" element={<UserAccount />} />
             <Route path="/register/:token" element={<Register />} />
             <Route path="/order/tracking" element={<TrackingPage />} />
-            <Route path="/pages/contact" element={<ContactUs />} />
+            <Route path="/contact-us" element={<ContactUs />} />
             <Route path="/policies/:policy" element={<Policies />} />
             <Route path="/beautybykiara/admin/dashboard/eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJqb2huc21pdGhAZ21haWwuY29tIjoiam9obnNtaXRoQGdtYWlsLmNvbSIsImpvaG4iOiJqb2hu" element={<AdminDashboard />} />
             <Route path="/crazywears/waterfall/admin/login" element={<AdminLogin />} />

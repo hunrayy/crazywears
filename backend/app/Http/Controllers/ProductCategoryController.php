@@ -108,7 +108,8 @@ class ProductCategoryController extends Controller
                 
                 // Delete the old image from Cloudinary if it exists
                 if ($oldImageUrl) {
-                    $publicId = ProductController::getPublicIdFromUrl($oldImageUrl);
+                    $publicId = ProductController::getPublicIdFromUrl($oldImageUrl, env('SUB_CATEGORY_FOLDER_FOR_PRODUCTS'));
+                    \Log::info('Deleting Cloudinary image with public ID: ' . $publicId);
                     $cloudinaryResponse = Cloudinary::destroy($publicId);
                     // Check if Cloudinary deletion was successful
                     if (isset($cloudinaryResponse['result']) && $cloudinaryResponse['result'] !== 'ok') {
@@ -116,13 +117,16 @@ class ProductCategoryController extends Controller
                         DB::rollBack();
                         return response()->json([
                             'code' => 'error',
-                            'message' => "Failed to edit product category. Please retry."
+                            'message' => "Failed to edit product category. Please retry.",
+                            'cloudinaryResponse' => $cloudinaryResponse,
+                            'public id' => $publicId,
+                            'old image url' => $oldImageUrl
                         ]);
                     }
                 }
                 
                 // Upload the new image to Cloudinary
-                $newImageUrl = ProductController::uploadToCloudinary($request->file('image'));
+                $newImageUrl = ProductController::uploadToCloudinary($request->file('image'), env('SUB_CATEGORY_FOLDER_FOR_PRODUCTS'));
 
                 if (!$newImageUrl) {
                     DB::rollBack();
@@ -162,7 +166,8 @@ class ProductCategoryController extends Controller
             DB::rollBack();
             return response()->json([
                 'code' => 'error',
-                'message' => "An error occurred while updating the product category: " . $e->getMessage()
+                'message' => "An error occurred while updating product category: ",
+                'reason' => $e->getMessage()
             ]);
         }
     }

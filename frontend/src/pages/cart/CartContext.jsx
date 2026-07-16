@@ -100,31 +100,68 @@ const CartProvider = ({ children }) => {
     fetchCartProducts();
   }, [selectedCurrency]); // If currency changes, we want to refetch the price
 
-  const addToCart = async (product, variant) => {
-    let getItems = JSON.parse(localStorage.getItem('cart_items')) || [];
+  const addToCart = (product, variant) => {
+    setCartProducts(prev => {
+      const existingIndex = prev.products.findIndex(
+        item =>
+          item.id === product.id &&
+          JSON.stringify(item.variant) === JSON.stringify(variant)
+      );
 
-    const existingIndex = getItems.findIndex(
-      item => item.id === product.id && JSON.stringify(item.variant) === JSON.stringify(variant)
-    );
+      let updatedProducts;
 
-    if (existingIndex !== -1) {
-      getItems.splice(existingIndex, 1);
-      toast.success("Product removed from cart");
-    } else {
-      // store only id, variant, quantity
-      getItems.push({
-        id: product.id,
-        variant, // no price here!
-        quantity: 1
-      });
-      toast.success("Product added successfully");
-    }
+      if (existingIndex !== -1) {
+        updatedProducts = prev.products.filter((_, i) => i !== existingIndex);
+        toast.success("Product removed from cart");
+      } else {
+        updatedProducts = [
+          ...prev.products,
+          {
+            id: product.id,
+            variant,
+            quantity: 1
+          }
+        ];
+        toast.success("Product added successfully");
+      }
 
-    localStorage.setItem('cart_items', JSON.stringify(getItems));
+      const updatedCart = {
+        ...prev,
+        products: updatedProducts
+      };
 
-    const result = await initializeCartProducts(); // fetch price dynamically
-    setCartProducts(result);
+      // persist to localStorage
+      localStorage.setItem("cart_items", JSON.stringify(updatedProducts));
+
+      return updatedCart;
+    });
   };
+
+  // const addToCart = async (product, variant) => {
+  //   let getItems = JSON.parse(localStorage.getItem('cart_items')) || [];
+
+  //   const existingIndex = getItems.findIndex(
+  //     item => item.id === product.id && JSON.stringify(item.variant) === JSON.stringify(variant)
+  //   );
+
+  //   if (existingIndex !== -1) {
+  //     getItems.splice(existingIndex, 1);
+  //     toast.success("Product removed from cart");
+  //   } else {
+  //     // store only id, variant, quantity
+  //     getItems.push({
+  //       id: product.id,
+  //       variant, // no price here!
+  //       quantity: 1
+  //     });
+  //     toast.success("Product added successfully");
+  //   }
+
+  //   localStorage.setItem('cart_items', JSON.stringify(getItems));
+
+  //   const result = await initializeCartProducts(); // fetch price dynamically
+  //   setCartProducts(result);
+  // };
 
   const updateCartItemLength = (productId, newLength, lengthPrice) => {
     const storedItems = JSON.parse(localStorage.getItem("cart_items")) || [];

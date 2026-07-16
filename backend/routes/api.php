@@ -40,6 +40,7 @@ Route::post('/createAccount', [AuthController::class, 'register']);
 //     Route::post('/createAccount', [AuthController::class, 'register']);
 //     // Add other routes that need token protection here
 // });
+
 Route::post('/login', [AuthController::class, 'login']);
 Route::get('/get-all-products', [ProductController::class, 'getAllProducts']);
 Route::get('/fetch-product-categories', [ProductController::class, 'fetchProductCategories']);

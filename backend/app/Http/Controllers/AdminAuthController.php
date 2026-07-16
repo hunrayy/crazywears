@@ -44,7 +44,7 @@ class AdminAuthController extends Controller
                 return response()->json(['message' => 'Invalid email/password', 'code' => 'error']);
             }
     
-            $shipping = Shipping::first();
+            // $shipping = Shipping::first();
             // Prepare the payload for JWT
             $payload = [
                 'userId' => $admin->id,
@@ -58,7 +58,7 @@ class AdminAuthController extends Controller
             
             $authControllerClass = new AuthController();
             // Create a token (20 days expiration)
-            $loginToken = $authControllerClass->createToken($payload, 60 * 60 * 24 * 20); // 20 days in seconds
+            $loginToken = $authControllerClass->createToken($payload, 1 * 86400); // 1 day in seconds
 
             // Prepare response data
             return response()->json([

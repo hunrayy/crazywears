@@ -12,11 +12,9 @@ class Product extends Model
     use HasFactory;
     protected $fillable = [
         'productName',
-        'productImage',
+        'mainProductMedia',
         'category_id',
-        'subImage1',
-        'subImage2',
-        'subImage3',
+        'subMedia',
         'productPrices'
     ];
     
@@ -26,6 +24,11 @@ class Product extends Model
 
     // Set the key type to string
     protected $keyType = 'string';
+
+    protected $casts = [
+        'subMedia' => 'array',
+        'productPrices' => 'array',
+    ];
 
     protected static function boot()
     {

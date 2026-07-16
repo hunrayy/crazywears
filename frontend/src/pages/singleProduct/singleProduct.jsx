@@ -36,6 +36,8 @@ console.log(productPrices)
 
   useEffect(() => {
     console.log(product)
+    console.log(typeof product)
+
     if (productSizes.length > 0) {
       setSizeState({
         sizes: productSizes,
@@ -110,10 +112,11 @@ console.log(productPrices)
   const currencySymbol = currencySymbols[selectedCurrency] || '';
 
   const productImages = [
-    product.img,
-    ...(product.subImage1 ? [product.subImage1] : []),
-    ...(product.subImage2 ? [product.subImage2] : []),
-    ...(product.subImage3 ? [product.subImage3] : [])
+    product.mainProductMedia,
+    ...product.subMedia
+    // ...(product.subImage1 ? [product.subImage1] : []),
+    // ...(product.subImage2 ? [product.subImage2] : []),
+    // ...(product.subImage3 ? [product.subImage3] : [])
   ];
 
   const convertedPrice = convertCurrency(
@@ -128,7 +131,7 @@ const preloadImage = (src)=> {
   img.src = src
 }
   useEffect(()=> {
-    preloadImage(product.img)
+    preloadImage(product.mainProductMedia)
   })
 
 if (error) return <div><p>Error retrieving product.</p></div>;
@@ -264,11 +267,17 @@ if (error) return <div><p>Error retrieving product.</p></div>;
                         </div>
                       }
                     </div>
-                    <div style={{minHeight: "50px"}}>
-                      {isLoading ? <div className="placeholder" style={{width: "50%", height: "30px"}}></div> :
-                      <div className="text-muted mb-2">Category: {product?.category?.name}</div>}
-                      {!isLoading && <div className="text-muted">size: {sizeState.sizePicked}</div> }
-                     
+                    <div style={{ minHeight: "50px" }}>
+                      {isLoading ? (
+                        <div className="placeholder" style={{ width: "50%", height: "30px" }}></div>
+                      ) : (
+                        <>
+                          {product?.category && (
+                            <div className="text-muted mb-2">Category: {product.category.name}</div>
+                          )}
+                          <div className="text-muted">size: {sizeState.sizePicked}</div>
+                        </>
+                      )}
                     </div>
                           
                           
@@ -296,7 +305,7 @@ if (error) return <div><p>Error retrieving product.</p></div>;
                     <hr />
                     {
                       isLoading ? <div className="placeholder w-100" style={{height: "50px"}}></div> : 
-                      (product.img && <div className="d-grid">
+                      (product.mainProductMedia && <div className="d-grid">
                         <button
                           className="btn hover-button"
                           // style={inCart || isRecentlyAdded ? { backgroundColor: "black"} : { border: "1px solid black", color: "black" }}

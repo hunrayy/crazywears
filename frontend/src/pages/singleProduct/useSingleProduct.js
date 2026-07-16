@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 const fetchProduct = async (productId) => {
   const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/get-single-product?productId=${productId}`);
+  console.log(data)
   return data;
 };
 
@@ -31,8 +32,13 @@ export const useSingleProduct = (productId) => {
 
     const productData = typeof data.data === "string" ? JSON.parse(data.data) : data.data;
 
-    const sizes = JSON.parse(productData.productPrices).filter(item => parseFloat(item.price) > 0);
-    console.log(sizes)
+    // const sizes = JSON.parse(productData.productPrices).filter(item => parseFloat(item.price) > 0);
+      // Parse productPrices
+      // console.log(sizes)
+    let sizes = (typeof productData.productPrices === "string" ? JSON.parse(productData.productPrices) : productData.productPrices).filter(item => parseFloat(item.price) > 0);
+
+    // SORT BY PRICE ASCENDING
+    sizes.sort((a, b) => Number(a.price) - Number(b.price));
         console.log(sizes.map(item => item.price))
 
     
@@ -40,12 +46,14 @@ export const useSingleProduct = (productId) => {
     return {
       product: {
         id: productData.id,
-        img: productData.productImage,
-        subImage1: productData.subImage1 !== "null" ? productData.subImage1 : "",
-        subImage2: productData.subImage2 !== "null" ? productData.subImage2 : "",
-        subImage3: productData.subImage3 !== "null" ? productData.subImage3 : "",
+        // img: productData.productImage,
+        mainProductMedia: productData.mainProductMedia,
+        // subImage1: productData.subImage1 !== "null" ? productData.subImage1 : "",
+        // subImage2: productData.subImage2 !== "null" ? productData.subImage2 : "",
+        // subImage3: productData.subImage3 !== "null" ? productData.subImage3 : "",
+        subMedia: productData.subMedia,
         name: productData.productName,
-        productPricesArray: JSON.parse(productData.productPrices),
+        productPricesArray: typeof productData.productPrices === "string" ? JSON.parse(productData.productPrices) : productData.productPrices,
         category: productData.category,
         pageNotFound: false,
       },

@@ -148,6 +148,7 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Facades\Cache;
 
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\DB;
 
 use App\Models\Product; 
 use App\Models\ProductsCategory; 
@@ -185,270 +186,28 @@ class ProductController extends Controller
         }
 
     }
-    // public function createProduct(Request $request){
-    //     // Validate request input
-    //     $validator = Validator::make($request->all(), [
-    //         'productImage' => 'required|image|mimes:jpeg,png,jpg,gif',
-    //         'productName' => 'required|string|max:255',
-    //         'productCategory' => 'nullable|string|exists:products_category,name',
-    //         'productPrice12Inches' => 'nullable|numeric',
-    //         'productPrice14Inches' => 'nullable|numeric',
-    //         'productPrice16Inches' => 'nullable|numeric',
-    //         'productPrice18Inches' => 'nullable|numeric',
-    //         'productPrice20Inches' => 'nullable|numeric',
-    //         'productPrice22Inches' => 'nullable|numeric',
-    //         'productPrice24Inches' => 'nullable|numeric',
-    //         'productPrice26Inches' => 'nullable|numeric',
-    //         'productPrice28Inches' => 'nullable|numeric',
-    //     ]);
 
-    //     if ($validator->fails()) {
-    //         return response()->json([
-    //             'message' => 'All fields are required.',
-    //             'code' => 'error',
-    //             'errors' => $validator->errors()
-    //         ]);
-    //     }
-
-    //     $hasAtLeastOnePrice = collect($request->all())
-    //         ->filter(function ($value, $key) {
-    //             return str_starts_with($key, 'productPrice') && $value !== null && $value !== '';
-    //         })->isNotEmpty();
-
-    //     if (!$hasAtLeastOnePrice) {
-    //         return response()->json([
-    //             'message' => 'At least one product price is required.',
-    //             'code' => 'error',
-    //         ]);
-    //     }
-
-
-    //     try{
-    //         // Handle file uploads
-    //         $uploadedProductImage = $this->uploadToCloudinary($request->file('productImage'));
-    //         $uploadedSubImage1 = $this->uploadToCloudinary($request->file('subImage1'));
-    //         $uploadedSubImage2 = $this->uploadToCloudinary($request->file('subImage2'));
-    //         $uploadedSubImage3 = $this->uploadToCloudinary($request->file('subImage3'));
-    //         // fetch the category id by name
-    //         $categoryName = $request->input('productCategory');
-    //         $categoryExists = ProductsCategory::where('name', $categoryName)->first();
-
-
-    //         // $categoryId = $categoryExists->id;
-
-    //         // if(!$categoryExists){
-    //         //     return response()->json([
-    //         //         'code' => 'error',
-    //         //         'message' => 'product category does not exist, kindly use a valid category'
-    //         //     ]);
-    //         // }
-
-    //         $categoryName = $request->input('productCategory');
-    //         $categoryExists = ProductsCategory::where('name', $categoryName)->first();
-
-    //         if (!$categoryExists) {
-    //             return response()->json([
-    //                 'code' => 'error',
-    //                 'message' => 'Product category does not exist, kindly use a valid category.'
-    //             ]);
-    //         }
-
-    //         $categoryId = $categoryExists->id;
-
-
-    //         // Create new product
-    //         Product::create([
-    //             'productName' => $request->input('productName'),
-    //             'productImage' => $uploadedProductImage,
-    //             'category_id' => $categoryId,
-    //             'subImage1' => $uploadedSubImage1,
-    //             'subImage2' => $uploadedSubImage2,
-    //             'subImage3' => $uploadedSubImage3,
-    //             'productPrice12Inches' => $request->input('productPrice12Inches'),
-    //             'productPrice14Inches' => $request->input('productPrice14Inches'),
-    //             'productPrice16Inches' => $request->input('productPrice16Inches'),
-    //             'productPrice18Inches' => $request->input('productPrice18Inches'),
-    //             'productPrice20Inches' => $request->input('productPrice20Inches'),
-    //             'productPrice22Inches' => $request->input('productPrice22Inches'),
-    //             'productPrice24Inches' => $request->input('productPrice24Inches'),
-    //             'productPrice26Inches' => $request->input('productPrice26Inches'),
-    //             'productPrice28Inches' => $request->input('productPrice28Inches'),
-    //         ]);
-
-    //         //update the cache to hold the current data
-    //         // Check if allProducts cache exists
-    //         $cachedProducts = Cache::get('allProducts');
-
-    //         $newProduct = Product::latest()->first(); // the one just created
-
-    //         if ($cachedProducts) {
-    //             // Decode the cached data
-    //             $decoded = json_decode($cachedProducts, true);
-
-    //             // Prepend the newly created product
-    //             array_unshift($decoded, $newProduct->toArray());
-
-    //             // Update the cache
-    //             Cache::put('allProducts', json_encode($decoded), now()->addWeek());
-    //         } else {
-    //             // Cache doesn't exist, fetch all from DB and cache it
-    //             $allProducts = Product::orderBy('created_at', 'desc')->get()->toArray();
-    //             Cache::put('allProducts', json_encode($allProducts), now()->addWeek());
-    //         }
-
-            
-    //         return response()->json([
-    //             'message' => 'Product created successfully.',
-    //             'code' => 'success',
-    //         ]);
-    //     }catch(\Exception $e){
-    //         // Log::error('Error occurred: ' . $e->getMessage());
-    //         return response()->json([
-    //             'message' => 'Error creating product.',
-    //             'code' => 'error',
-    //             'reason' => $e->getMessage()
-    //         ]);
-    //     }
-    // }
-
-
-    public function createProduct(Request $request)
-    {
-        // Step 1: Decode prices if sent as JSON
-        $prices = json_decode($request->input('productPrices'), true);
-
-        // Step 2: Validation
-        $validator = Validator::make([
-            'productImage' => $request->file('productImage'),
-            'productName' => $request->input('productName'),
-            'productCategory' => $request->input('productCategory'),
-            'productPrices' => $prices
-        ], [
-            'productImage' => 'required|image|mimes:jpeg,png,jpg,gif',
-            'productName' => 'required|string|max:255',
-            'productCategory' => 'nullable|string|exists:products_category,name',
-            'productPrices' => 'required|array|min:1',
-            'productPrices.*.size' => 'required|string|max:100',
-            'productPrices.*.price' => 'required|numeric|min:0'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed.',
-                'code' => 'error',
-                'errors' => $validator->errors()
-            ]);
-        }
-
-        try {
-
-            // Upload main image
-            $uploadedProductImage = $this->uploadToCloudinary($request->file('productImage'));
-
-            if (!$uploadedProductImage) {
-                return response()->json([
-                    'code' => 'error',
-                    'message' => 'Failed to upload the main product image.'
-                ]);
-            }
-
-            // Upload optional images
-            $uploadedSubImage1 = $request->hasFile('subImage1') ? $this->uploadToCloudinary($request->file('subImage1')) : null;
-            $uploadedSubImage2 = $request->hasFile('subImage2') ? $this->uploadToCloudinary($request->file('subImage2')) : null;
-            $uploadedSubImage3 = $request->hasFile('subImage3') ? $this->uploadToCloudinary($request->file('subImage3')) : null;
-
-            // Get category ID
-            $categoryId = null;
-
-            if ($request->productCategory) {
-
-                $category = ProductsCategory::where('name', $request->productCategory)->first();
-
-                if (!$category) {
-                    return response()->json([
-                        'code' => 'error',
-                        'message' => 'Product category does not exist.'
-                    ]);
-                }
-
-                $categoryId = $category->id;
-            }
-
-            // Create product
-            $newProduct = Product::create([
-                'productName' => $request->productName,
-                'productImage' => $uploadedProductImage,
-                'category_id' => $categoryId,
-                'subImage1' => $uploadedSubImage1,
-                'subImage2' => $uploadedSubImage2,
-                'subImage3' => $uploadedSubImage3,
-
-                // Save sizes + prices as JSON
-                'productPrices' => json_encode($prices)
-            ]);
-
-            // Cache update
-            $cachedProducts = Cache::get('allProducts');
-
-            if ($cachedProducts) {
-
-                array_unshift($cachedProducts, $newProduct->toArray());
-
-                Cache::put('allProducts', $cachedProducts, now()->addWeek());
-
-            } else {
-
-                $allProducts = Product::orderBy('created_at', 'desc')->get()->toArray();
-
-                Cache::put('allProducts', $allProducts, now()->addWeek());
-            }
-
-            return response()->json([
-                'message' => 'Product created successfully.',
-                'code' => 'success'
-            ]);
-
-        } catch (\Exception $e) {
-
-            return response()->json([
-                'message' => 'Error creating product.',
-                'code' => 'error',
-                'reason' => $e->getMessage()
-            ]);
-        }
-    }
 
     // public function createProduct(Request $request)
     // {
-    //     // Step 1: Basic Validation (excluding the "at least one price" rule)
+    //     // Step 1: Decode prices if sent as JSON
+    //     $prices = json_decode($request->input('productPrices'), true);
 
-    //     $validator = Validator::make($request->all(), [
+    //     // Step 2: Validation
+    //     $validator = Validator::make([
+    //         'productImage' => $request->file('productImage'),
+    //         'productName' => $request->input('productName'),
+    //         'productCategory' => $request->input('productCategory'),
+    //         'productPrices' => $prices
+    //     ], [
     //         'productImage' => 'required|image|mimes:jpeg,png,jpg,gif',
     //         'productName' => 'required|string|max:255',
     //         'productCategory' => 'nullable|string|exists:products_category,name',
-    //         'productPrice12Inches' => 'nullable|numeric',
-    //         'productPrice14Inches' => 'nullable|numeric',
-    //         'productPrice16Inches' => 'nullable|numeric',
-    //         'productPrice18Inches' => 'nullable|numeric',
-    //         'productPrice20Inches' => 'nullable|numeric',
-    //         'productPrice22Inches' => 'nullable|numeric',
-    //         'productPrice24Inches' => 'nullable|numeric',
-    //         'productPrice26Inches' => 'nullable|numeric',
-    //         'productPrice28Inches' => 'nullable|numeric',
+    //         'productPrices' => 'required|array|min:1',
+    //         'productPrices.*.size' => 'required|string|max:100',
+    //         'productPrices.*.price' => 'required|numeric|min:0'
     //     ]);
 
-    //     // Step 2: Add custom validation after base validation
-    //     $validator->after(function ($validator) use ($request) {
-    //         $hasAtLeastOnePrice = collect($request->all())
-    //             ->filter(fn($value, $key) => str_starts_with($key, 'productPrice') && $value !== null && $value !== '')
-    //             ->isNotEmpty();
-
-    //         if (!$hasAtLeastOnePrice) {
-    //             $validator->errors()->add('productPrices', 'At least one product price is required.');
-    //         }
-    //     });
-
-    //     // Step 3: Handle validation failure
     //     if ($validator->fails()) {
     //         return response()->json([
     //             'message' => 'Validation failed.',
@@ -458,8 +217,10 @@ class ProductController extends Controller
     //     }
 
     //     try {
-    //         // Step 4: Upload required main image
+
+    //         // Upload main image
     //         $uploadedProductImage = $this->uploadToCloudinary($request->file('productImage'));
+
     //         if (!$uploadedProductImage) {
     //             return response()->json([
     //                 'code' => 'error',
@@ -467,71 +228,390 @@ class ProductController extends Controller
     //             ]);
     //         }
 
-    //         // Step 5: Upload optional sub-images
+    //         // Upload optional images
     //         $uploadedSubImage1 = $request->hasFile('subImage1') ? $this->uploadToCloudinary($request->file('subImage1')) : null;
     //         $uploadedSubImage2 = $request->hasFile('subImage2') ? $this->uploadToCloudinary($request->file('subImage2')) : null;
     //         $uploadedSubImage3 = $request->hasFile('subImage3') ? $this->uploadToCloudinary($request->file('subImage3')) : null;
 
-    //         // Step 6: Get category ID if category is provided
+    //         // Get category ID
     //         $categoryId = null;
-    //         $categoryName = $request->input('productCategory');
-    //         if ($categoryName) {
-    //             $category = ProductsCategory::where('name', $categoryName)->first();
+
+    //         if ($request->productCategory) {
+
+    //             $category = ProductsCategory::where('name', $request->productCategory)->first();
+
     //             if (!$category) {
     //                 return response()->json([
     //                     'code' => 'error',
-    //                     'message' => 'Product category does not exist, kindly use a valid category.'
+    //                     'message' => 'Product category does not exist.'
     //                 ]);
     //             }
+
     //             $categoryId = $category->id;
     //         }
 
-    //         // Step 7: Create product
+    //         // Create product
     //         $newProduct = Product::create([
-    //             'productName' => $request->input('productName'),
+    //             'productName' => $request->productName,
     //             'productImage' => $uploadedProductImage,
     //             'category_id' => $categoryId,
     //             'subImage1' => $uploadedSubImage1,
     //             'subImage2' => $uploadedSubImage2,
     //             'subImage3' => $uploadedSubImage3,
-    //             'productPrice12Inches' => $request->input('productPrice12Inches'),
-    //             'productPrice14Inches' => $request->input('productPrice14Inches'),
-    //             'productPrice16Inches' => $request->input('productPrice16Inches'),
-    //             'productPrice18Inches' => $request->input('productPrice18Inches'),
-    //             'productPrice20Inches' => $request->input('productPrice20Inches'),
-    //             'productPrice22Inches' => $request->input('productPrice22Inches'),
-    //             'productPrice24Inches' => $request->input('productPrice24Inches'),
-    //             'productPrice26Inches' => $request->input('productPrice26Inches'),
-    //             'productPrice28Inches' => $request->input('productPrice28Inches'),
+
+    //             // Save sizes + prices as JSON
+    //             'productPrices' => json_encode($prices)
     //         ]);
 
-    //         // Step 8: Cache update
+    //         // Cache update
     //         $cachedProducts = Cache::get('allProducts');
+
     //         if ($cachedProducts) {
-    //             // $decoded = json_decode($cachedProducts, true);
-    //             // array_unshift($decoded, $newProduct->toArray());
+
     //             array_unshift($cachedProducts, $newProduct->toArray());
-    //             // Cache::put('allProducts', json_encode($decoded), now()->addWeek());
-    //             Cache::put('allProducts', $cachedProducts, now()->addWeek(1));
+
+    //             Cache::put('allProducts', $cachedProducts, now()->addWeek());
+
     //         } else {
+
     //             $allProducts = Product::orderBy('created_at', 'desc')->get()->toArray();
-    //             // Cache::put('allProducts', json_encode($allProducts), now()->addWeek());
-    //             Cache::put('allProducts', $allProducts, now()->addWeek(1));
+
+    //             Cache::put('allProducts', $allProducts, now()->addWeek());
     //         }
 
-    //         // Step 9: Response
     //         return response()->json([
     //             'message' => 'Product created successfully.',
-    //             'code' => 'success',
+    //             'code' => 'success'
     //         ]);
+
     //     } catch (\Exception $e) {
+
     //         return response()->json([
     //             'message' => 'Error creating product.',
     //             'code' => 'error',
-    //             'reason' => $e->getMessage(),
+    //             'reason' => $e->getMessage()
     //         ]);
     //     }
     // }
+
+
+
+    public function createProduct(Request $request)
+    {
+        $prices = json_decode($request->input('productPrices'), true);
+
+        // Extract sub images
+        $subImages = [];
+        foreach ($request->allFiles() as $key => $file) {
+            if (str_starts_with($key, 'subImage')) {
+                $subImages[] = $file;
+            }
+        }
+
+        $validator = Validator::make(
+            [
+                'productImage'       => $request->file('productImage'),
+                'productName'        => $request->input('productName'),
+                'productCategoryId'  => $request->input('productCategoryId'),
+                'productPrices'      => $prices,
+                'subImages'          => $subImages
+            ],
+            [
+                'productImage' => 'required|image|mimes:jpeg,png,jpg,gif|max:1024',
+                'productName'  => 'required|string|max:255',
+                'productCategoryId' => 'nullable|exists:products_category,id',
+
+                'productPrices' => 'required|array|min:1',
+                'productPrices.*.size'  => 'required|string|max:100',
+                'productPrices.*.price' => 'required|numeric|min:0',
+
+                'subImages'   => 'nullable|array|max:5',
+                'subImages.*' => 'image|mimes:jpeg,png,jpg,gif|max:1024'
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => "An error occurred: " . $validator->errors()->first(),
+                'code'    => 'error',
+                'errors'  => $validator->errors()
+            ]);
+        }
+
+        // 🔥 Track URLs instead of public_id
+        $uploadedUrls = [];
+        $uploadedSubMedia = [];
+
+        try {
+            DB::beginTransaction();
+
+            /*
+            |--------------------------------------------------------------------------
+            | Upload Main Image
+            |--------------------------------------------------------------------------
+            */
+            $mainUrl = $this->uploadToCloudinary($request->file('productImage'));
+
+            if (!$mainUrl) {
+                throw new \Exception("Main image upload failed");
+            }
+
+            $uploadedUrls[] = $mainUrl;
+
+            /*
+            |--------------------------------------------------------------------------
+            | Upload Sub Images (STRICT)
+            |--------------------------------------------------------------------------
+            */
+            foreach ($subImages as $file) {
+                $url = $this->uploadToCloudinary($file);
+
+                if (!$url) {
+                    throw new \Exception("One or more sub images failed");
+                }
+
+                $uploadedUrls[] = $url;
+                $uploadedSubMedia[] = $url;
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Normalize Prices
+            |--------------------------------------------------------------------------
+            */
+            $cleanedPrices = [];
+
+            foreach ($prices as $item) {
+                $cleanedPrices[] = [
+                    'size'  => trim($item['size']),
+                    'price' => (float) $item['price']
+                ];
+            }
+
+            /*
+            |--------------------------------------------------------------------------
+            | Create Product
+            |--------------------------------------------------------------------------
+            */
+            $newProduct = Product::create([
+                'productName'      => $request->productName,
+                'mainProductMedia' => $mainUrl,
+                'category_id'      => $request->input('productCategoryId'),
+                'subMedia'         => !empty($uploadedSubMedia) ? json_encode($uploadedSubMedia) : null,
+                'productPrices'    => json_encode($cleanedPrices)
+            ]);
+
+            Cache::forget('allProducts');
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Product created successfully.',
+                'code'    => 'success',
+                'data'    => $newProduct
+            ]);
+
+        } catch (\Exception $e) {
+
+            DB::rollBack();
+
+            /*
+            |--------------------------------------------------------------------------
+            | 🔥 CLEANUP USING HELPER
+            |--------------------------------------------------------------------------
+            */
+            foreach ($uploadedUrls as $url) {
+                try {
+                    $publicId = $this->getPublicIdFromUrl($url);
+                    $this->deleteFromCloudinary($publicId);
+                } catch (\Exception $cleanupError) {
+                    // ignore cleanup failure
+                }
+            }
+
+            return response()->json([
+                'message' => 'Error creating product.',
+                'code'    => 'error',
+                'reason'  => $e->getMessage()
+            ]);
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+// public function createProduct(Request $request)
+// {
+
+// $totalSize = 0;
+
+// if ($request->hasFile('mainProductMedia')) {
+//     $totalSize += $request->file('mainProductMedia')->getSize();
+// }
+
+// if ($request->hasFile('subMedia')) {
+//     foreach ($request->file('subMedia') as $file) {
+//         $totalSize += $file->getSize();
+//     }
+// }
+
+// $totalSizeMB = $totalSize / (1024 * 1024);
+
+// if ($totalSizeMB > 30) {
+//     return response()->json([
+//         'code' => 'error',
+//         'message' => "Total upload size exceeds 30MB limit. Current: {$totalSizeMB}MB"
+//     ]);
+// }
+
+
+
+
+
+
+
+
+//     // ✅ VALIDATION
+//     $validator = Validator::make($request->all(), [
+//         'mainProductMedia' => 'required|file|mimes:jpeg,png,jpg,webp,mp4,webm,ogg|max:10240',
+//         'productName' => 'required|string|max:255',
+//         'productCategory' => 'required|exists:products_category,id',
+//         'subMedia.*' => 'nullable|file|mimes:jpeg,png,jpg,webp,mp4,webm,ogg|max:10240',
+//         'productPrices' => 'required|json',
+//     ]);
+
+//     if ($validator->fails()) {
+//         return response()->json([
+//             'code' => 'error',
+//             'message' => 'Validation failed.',
+//             'errors' => $validator->errors(),
+//             'debug_files' => $_FILES
+//         ]);
+//     }
+
+//     // ✅ Decode and validate productPrices structure
+//     $prices = json_decode($request->input('productPrices'), true);
+
+//     if (!is_array($prices) || empty($prices)) {
+//         return response()->json([
+//             'code' => 'error',
+//             'message' => 'Invalid or empty product prices.'
+//         ]);
+//     }
+
+//     foreach ($prices as $price) {
+//         if (
+//             !isset($price['size']) ||
+//             !isset($price['price']) ||
+//             empty($price['size']) ||
+//             empty($price['price'])
+//         ) {
+//             return response()->json([
+//                 'code' => 'error',
+//                 'message' => 'Each price must have a valid size and price.'
+//             ]);
+//         }
+//     }
+
+//     DB::beginTransaction();
+
+//     // Track uploaded files for rollback safety
+//     $uploadedFiles = [];
+
+//     try {
+
+//         // ✅ Upload MAIN media
+//         $mainUpload = $this->uploadToCloudinary(
+//             $request->file('mainProductMedia')
+//         );
+
+//         if (!$mainUpload) {
+//             throw new \Exception('Failed to upload main media.');
+//         }
+
+//         $uploadedFiles[] = $mainUpload;
+
+//         // ✅ Upload SUB media
+//         $subMediaUrls = [];
+
+//         if ($request->hasFile('subMedia')) {
+//             foreach ($request->file('subMedia') as $file) {
+
+//                 $uploaded = $this->uploadToCloudinary($file);
+
+//                 if (!$uploaded) {
+//                     throw new \Exception('Failed to upload one of the sub media files.');
+//                 }
+
+//                 $uploadedFiles[] = $uploaded;
+//                 $subMediaUrls[] = $uploaded;
+//             }
+//         }
+
+//         // ✅ Create product
+//         $product = Product::create([
+//             'productName' => $request->productName,
+//             'mainProductMedia' => $mainUpload,
+//             'category_id' => $request->productCategory,
+//             'subMedia' => json_encode($subMediaUrls),
+//             'productPrices' => json_encode($prices)
+//         ]);
+
+//         // ✅ Cache update
+//         $cachedProducts = Cache::get('allProducts');
+
+//         if ($cachedProducts) {
+//             array_unshift($cachedProducts, $product->toArray());
+//             Cache::put('allProducts', $cachedProducts, now()->addWeek());
+//         } else {
+//             Cache::put(
+//                 'allProducts',
+//                 Product::orderBy('created_at', 'desc')->get()->toArray(),
+//                 now()->addWeek()
+//             );
+//         }
+
+//         DB::commit();
+
+//         return response()->json([
+//             'code' => 'success',
+//             'message' => 'Product created successfully.'
+//         ]);
+
+//     } catch (\Exception $e) {
+
+//         DB::rollBack();
+
+//         // ✅ Cleanup uploaded files (VERY IMPORTANT)
+//         foreach ($uploadedFiles as $file) {
+//             try {
+//                 $this->deleteFromCloudinary($file);
+//             } catch (\Exception $cleanupError) {
+//                 // silently fail cleanup (don't override main error)
+//             }
+//         }
+
+//         return response()->json([
+//             'code' => 'error',
+//             'message' => 'Error creating product.',
+//             'reason' => $e->getMessage()
+//         ]);
+//     }
+// }
+
+
 
 
 
@@ -616,51 +696,7 @@ class ProductController extends Controller
     // }
 
 
-
-    // public static function uploadToCloudinary($file){
-    //     if(!$file){
-    //         return null;
-    //     }
-
-    //     try {
-    //         $folderName = env('FOLDER_FOR_IMAGES_IN_CLOUDINARY');
-
-    //         // Get file content and hash it
-    //         $hash = md5_file($file->getRealPath());
-    //         $publicId = $folderName . '/' . $hash;
-
-    //         // Check if it already exists
-    //         $existingResource = \Cloudinary\Api\Admin\AdminApi::asset($publicId);
-
-    //         if ($existingResource && isset($existingResource['secure_url'])) {
-    //             // ✅ Image already exists
-    //             return $existingResource['secure_url'];
-    //         }
-
-    //     } catch (\Cloudinary\Api\Exception\NotFound $e) {
-    //         // Not found means it doesn't exist yet — proceed to upload
-    //     } catch (\Exception $e) {
-    //         return false; // some other error occurred
-    //     }
-
-    //     try {
-    //         // Upload with deterministic public_id
-    //         $uploadResult = \Cloudinary\Uploader::upload($file->getRealPath(), [
-    //             'folder' => $folderName,
-    //             'public_id' => $hash,
-    //             'overwrite' => false, // Don't overwrite if it exists
-    //         ]);
-
-    //         return $uploadResult['secure_url'] ?? false;
-
-    //     } catch (\Exception $e) {
-    //         return false;
-    //     }
-    // }
-
-
-
-    public static function uploadToCloudinary($file)
+    public static function uploadToCloudinary($file, $subFolder = null)
     {
         if (!$file) {
             \Log::error('uploadToCloudinary received null file');
@@ -668,15 +704,20 @@ class ProductController extends Controller
         }
 
         try {
-            $folderName = env('FOLDER_FOR_IMAGES_IN_CLOUDINARY');
-            $hash = md5_file($file->getRealPath());
-            $publicId = $folderName . '/' . $hash;
+            $folderName = rtrim(env('FOLDER_FOR_IMAGES_IN_CLOUDINARY'), '/');
 
-            // Upload the file with a unique public ID, avoid overwriting if it exists
+            if ($subFolder) {
+                $folderName .= '/' . trim($subFolder, '/');
+            }
+
+            // 🔥 safer unique ID (not tied only to file content)
+            $publicId = uniqid() . '_' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
             $uploadResult = Cloudinary::upload($file->getRealPath(), [
-                'folder' => $folderName,
-                'public_id' => $hash,
-                'overwrite' => false,
+                'folder'        => $folderName,
+                'public_id'     => $publicId,
+                'overwrite'     => false,
+                'resource_type' => 'image',
             ]);
 
             return $uploadResult->getSecurePath();
@@ -686,6 +727,40 @@ class ProductController extends Controller
             return false;
         }
     }
+
+
+
+    
+    // public static function uploadToCloudinary($file, $subFolder = null)
+    // {
+    //     if (!$file) {
+    //         \Log::error('uploadToCloudinary received null file');
+    //         return false;
+    //     }
+
+    //     try {
+    //         $folderName = env('FOLDER_FOR_IMAGES_IN_CLOUDINARY');
+    //         // Append subfolder only if it's provided
+    //         if ($subFolder) {
+    //             $folderName .= '/' . trim($subFolder, '/'); // remove any leading/trailing slashes
+    //         }
+    //         $hash = md5_file($file->getRealPath());
+    //         $publicId = $folderName . '/' . $hash;
+
+    //         // Upload the file with a unique public ID, avoid overwriting if it exists
+    //         $uploadResult = Cloudinary::upload($file->getRealPath(), [
+    //             'folder' => $folderName,
+    //             'public_id' => $hash,
+    //             'overwrite' => false,
+    //         ]);
+
+    //         return $uploadResult->getSecurePath();
+
+    //     } catch (\Exception $e) {
+    //         \Log::error('Cloudinary upload error: ' . $e->getMessage());
+    //         return false;
+    //     }
+    // }
 
     // public function getAllProducts(Request $request) {
     //     $category = $request->query('productCategory');
@@ -755,7 +830,7 @@ class ProductController extends Controller
         if (strtolower($category) === "all") {
             // Force result into a collection to avoid "slice on string" error
             $allProducts = collect(Cache::remember('allProducts', now()->addMinutes(10), function () {
-                return Product::orderBy('created_at', 'desc')->get()->toArray();
+                return Product::with('category')->orderBy('created_at', 'desc')->get()->toArray();
             }));
 
             // Paginate manually
@@ -793,7 +868,7 @@ class ProductController extends Controller
             $categoryId = $categoryRecord->id;
         }
 
-        $query = Product::orderBy('created_at', 'desc');
+        $query = Product::with('category')->orderBy('created_at', 'desc');
         if ($category === null) {
             $query->whereNull('category_id');
         } else {
@@ -951,139 +1026,324 @@ class ProductController extends Controller
             ]);
         }
     }
-    
 
+    public function updateProduct(Request $request)
+    {
+        try {
 
-    public function updateProduct(Request $request){
-        try{
+            /*
+            ========================
+            VALIDATION
+            ========================
+            */
             $request->validate([
-                'productImage' => 'required|string',
-                'productName' => 'required|string',
-                'productPrice12Inches' => 'required|numeric',
-                'productPrice14Inches' => 'required|numeric',
-                'productPrice16Inches' => 'required|numeric',
-                'productPrice18Inches' => 'required|numeric',
-                'productPrice20Inches' => 'required|numeric',
-                'productPrice22Inches' => 'required|numeric',
-                'productPrice24Inches' => 'required|numeric',
-                'productPrice26Inches' => 'required|numeric',
-                'productPrice28Inches' => 'required|numeric',
-
+                'productName'   => 'required|string',
+                'category_id'   => 'required|exists:products_category,id',
+                'productPrices' => 'required|string',
             ]);
+
+            // Validate files dynamically
+            foreach ($request->files as $key => $file) {
+                if (str_starts_with($key, 'subImage') || $key === 'productImage') {
+                    $request->validate([
+                        $key => 'image|max:1024' // 1MB
+                    ]);
+                }
+            }
+
+            /*
+            ========================
+            FIND PRODUCT
+            ========================
+            */
             $productId = $request->query('productId');
-            $product = Product::where('id', $productId)->first();
-            
-            //if newProductImage, newSubImage1, newSubImage2, or newSubImage3 exists, there is an intention to update the image
-    
-            // Process Product Image
+            $product = Product::findOrFail($productId);
+
+            /*
+            ========================
+            DECODE PRICES
+            ========================
+            */
+            $productPrices = json_decode($request->productPrices, true);
+
+            if (!is_array($productPrices)) {
+                return response()->json([
+                    "code" => "error",
+                    "message" => "Invalid product prices format"
+                ]);
+            }
+
+            foreach ($productPrices as $item) {
+                if (
+                    empty($item['size']) ||
+                    empty($item['price'])
+                ) {
+                    return response()->json([
+                        "code" => "error",
+                        "message" => "Each size must have a corresponding price"
+                    ]);
+                }
+            }
+
+            /*
+            ========================
+            MAIN IMAGE
+            ========================
+            */
             if ($request->hasFile('productImage')) {
-                // Check if there is an existing product image
-                if ($product->productImage) {
-                    // Delete old product image from Cloudinary
-                    $oldProductImagePublicId = $this->getPublicIdFromUrl($product->productImage);
-                    if ($oldProductImagePublicId) {
-                        Cloudinary::destroy($oldProductImagePublicId);
+
+                if ($product->mainProductMedia) {
+                    $oldId = $this->getPublicIdFromUrl($product->mainProductMedia);
+                    if ($oldId) Cloudinary::destroy($oldId);
+                }
+
+                $product->mainProductMedia = $this->uploadToCloudinary(
+                    $request->file('productImage')
+                );
+            }
+
+            /*
+            ========================
+            SUB MEDIA (DYNAMIC)
+            ========================
+            */
+            $finalSubMedia = [];
+
+            // Loop through ALL request keys
+            foreach ($request->all() as $key => $value) {
+
+                // Match subImageX
+                if (preg_match('/^subImage(\d+)$/', $key, $matches)) {
+
+                    $index = $matches[1];
+                    $fileKey = "subImage{$index}";
+                    $oldKey  = "subImage{$index}_oldUrl";
+
+                    // Case 1: New file uploaded
+                    if ($request->hasFile($fileKey)) {
+
+                        // delete old if exists
+                        if ($request->has($oldKey)) {
+                            $oldUrl = $request->input($oldKey);
+                            $oldId = $this->getPublicIdFromUrl($oldUrl);
+                            if ($oldId) Cloudinary::destroy($oldId);
+                        }
+
+                        $uploadedUrl = $this->uploadToCloudinary(
+                            $request->file($fileKey)
+                        );
+
+                        $finalSubMedia[] = $uploadedUrl;
+                    }
+
+                    // Case 2: Keep old image
+                    elseif ($request->has($oldKey)) {
+                        $finalSubMedia[] = $request->input($oldKey);
                     }
                 }
-    
-                // Upload new product image to Cloudinary
-                $newProductImage = $this->uploadToCloudinary($request->file('productImage'));
-    
-                // Update the product image in the database
-                $product->productImage = $newProductImage;
             }
-    
-            // Process Sub Image 1
-            if ($request->hasFile('subImage1')) {
-                if ($product->subImage1) {
-                    $oldSubImage1PublicId = $this->getPublicIdFromUrl($product->subImage1);
-                    if ($oldSubImage1PublicId) {
-                        Cloudinary::destroy($oldSubImage1PublicId);
+
+            // Also handle old images that were sent WITHOUT new file
+            foreach ($request->all() as $key => $value) {
+                if (preg_match('/^subImage(\d+)_oldUrl$/', $key)) {
+
+                    $index = str_replace(['subImage', '_oldUrl'], '', $key);
+                    $fileKey = "subImage{$index}";
+
+                    // If no new file, keep old
+                    if (!$request->hasFile($fileKey)) {
+                        $finalSubMedia[] = $value;
                     }
                 }
-    
-                $newSubImage1 = $this->uploadToCloudinary($request->file('subImage1'));
-                $product->subImage1 = $newSubImage1;
             }
-    
-            // Process Sub Image 2
-            if ($request->hasFile('subImage2')) {
-                if ($product->subImage2) {
-                    $oldSubImage1PublicId = $this->getPublicIdFromUrl($product->subImage2);
-                    if ($oldSubImage2PublicId) {
-                        Cloudinary::destroy($oldSubImage2PublicId);
-                    }
-                }
-    
-                $newSubImage2 = $this->uploadToCloudinary($request->file('subImage2'));
-                $product->subImage2 = $newSubImage2;
-            }
-    
-            // Process Sub Image 3
-            if ($request->hasFile('subImage3')) {
-                if ($product->subImage3) {
-                    $oldSubImage3PublicId = $this->getPublicIdFromUrl($product->subImage3);
-                    if ($oldSubImage3PublicId) {
-                        Cloudinary::destroy($oldSubImage3PublicId);
-                    }
-                }
-    
-                $newSubImage3 = $this->uploadToCloudinary($request->file('subImage3'));
-                $product->subImage3 = $newSubImage3;
-            }
-    
-            //process the product price
-            // if($request->has('productName')){
-            //     // Update the name in the database
-            //     $product->productName = $request->input('productName');
-            // }
-    
-            // //process the product price
-            // if($request->has('productPrice12Inches')){
-            //     // Update the price in the database
-            //     $product->productPrice = $request->input('productPrice');
-            // }
 
-            $product->productName = $request->input('productName');
-            $product->productPrice12Inches = $request->input('productPrice12Inches');
-            $product->productPrice14Inches = $request->input('productPrice14Inches');
-            $product->productPrice16Inches = $request->input('productPrice16Inches');
-            $product->productPrice18Inches = $request->input('productPrice18Inches');
-            $product->productPrice20Inches = $request->input('productPrice20Inches');
-            $product->productPrice22Inches = $request->input('productPrice22Inches');
-            $product->productPrice24Inches = $request->input('productPrice24Inches');
-            $product->productPrice26Inches = $request->input('productPrice26Inches');
-            $product->productPrice28Inches = $request->input('productPrice28Inches');
+            /*
+            ========================
+            UPDATE PRODUCT
+            ========================
+            */
+            $product->productName   = $request->productName;
+            $product->category_id   = $request->category_id;
+            $product->productPrices = $productPrices; // cast handles JSON
+            $product->subMedia      = array_values(array_unique($finalSubMedia)); // clean + reindex
 
-
-
-    
-            // Save the updated product in the database
             $product->save();
-            $product->refresh();
 
-            //update the cache to hold the current data
-            $allProducts = Product::orderBy('created_at', 'desc')->get()->toArray();
-            // Cache::put('allProducts', json_encode($allProducts, true));
-            Cache::put('allProducts', $allProducts, now()->addWeek(1));
-            Cache::put("singleProduct_{$productId}", $product, 1440); //expiry date of 1 day in minutes
+            /*
+            ========================
+            CACHE UPDATE
+            ========================
+            */
+            Cache::put("singleProduct_{$productId}", $product, now()->addDay());
 
-        
-    
+            $cachedProducts = Cache::get('allProducts');
+
+            if ($cachedProducts) {
+                $cachedProducts = collect($cachedProducts);
+
+                $index = $cachedProducts->search(function ($item) use ($product) {
+                    return $item['id'] === $product->id;
+                });
+
+                if ($index !== false) {
+                    $cachedProducts[$index] = $product->toArray();
+                }
+
+                Cache::put('allProducts', $cachedProducts->toArray(), now()->addWeek());
+            }
+
+            /*
+            ========================
+            RESPONSE
+            ========================
+            */
             return response()->json([
                 "code" => "success",
                 "message" => "Product updated successfully",
             ]);
-        }catch(Exception $e){
+
+        } catch (\Exception $e) {
+
             return response()->json([
                 "code" => "error",
-                "message" => "An error occured while updating product",
+                "message" => "An error occurred while updating product",
                 "reason" => $e->getMessage()
             ]);
         }
+    }
+    
+
+
+    // public function updateProduct(Request $request){
+    //     try{
+    //         $request->validate([
+    //             'productImage' => 'required|string',
+    //             'productName' => 'required|string',
+    //             'productPrice12Inches' => 'required|numeric',
+    //             'productPrice14Inches' => 'required|numeric',
+    //             'productPrice16Inches' => 'required|numeric',
+    //             'productPrice18Inches' => 'required|numeric',
+    //             'productPrice20Inches' => 'required|numeric',
+    //             'productPrice22Inches' => 'required|numeric',
+    //             'productPrice24Inches' => 'required|numeric',
+    //             'productPrice26Inches' => 'required|numeric',
+    //             'productPrice28Inches' => 'required|numeric',
+
+    //         ]);
+    //         $productId = $request->query('productId');
+    //         $product = Product::where('id', $productId)->first();
+            
+    //         //if newProductImage, newSubImage1, newSubImage2, or newSubImage3 exists, there is an intention to update the image
+    
+    //         // Process Product Image
+    //         if ($request->hasFile('productImage')) {
+    //             // Check if there is an existing product image
+    //             if ($product->productImage) {
+    //                 // Delete old product image from Cloudinary
+    //                 $oldProductImagePublicId = $this->getPublicIdFromUrl($product->productImage);
+    //                 if ($oldProductImagePublicId) {
+    //                     Cloudinary::destroy($oldProductImagePublicId);
+    //                 }
+    //             }
+    
+    //             // Upload new product image to Cloudinary
+    //             $newProductImage = $this->uploadToCloudinary($request->file('productImage'));
+    
+    //             // Update the product image in the database
+    //             $product->productImage = $newProductImage;
+    //         }
+    
+    //         // Process Sub Image 1
+    //         if ($request->hasFile('subImage1')) {
+    //             if ($product->subImage1) {
+    //                 $oldSubImage1PublicId = $this->getPublicIdFromUrl($product->subImage1);
+    //                 if ($oldSubImage1PublicId) {
+    //                     Cloudinary::destroy($oldSubImage1PublicId);
+    //                 }
+    //             }
+    
+    //             $newSubImage1 = $this->uploadToCloudinary($request->file('subImage1'));
+    //             $product->subImage1 = $newSubImage1;
+    //         }
+    
+    //         // Process Sub Image 2
+    //         if ($request->hasFile('subImage2')) {
+    //             if ($product->subImage2) {
+    //                 $oldSubImage1PublicId = $this->getPublicIdFromUrl($product->subImage2);
+    //                 if ($oldSubImage2PublicId) {
+    //                     Cloudinary::destroy($oldSubImage2PublicId);
+    //                 }
+    //             }
+    
+    //             $newSubImage2 = $this->uploadToCloudinary($request->file('subImage2'));
+    //             $product->subImage2 = $newSubImage2;
+    //         }
+    
+    //         // Process Sub Image 3
+    //         if ($request->hasFile('subImage3')) {
+    //             if ($product->subImage3) {
+    //                 $oldSubImage3PublicId = $this->getPublicIdFromUrl($product->subImage3);
+    //                 if ($oldSubImage3PublicId) {
+    //                     Cloudinary::destroy($oldSubImage3PublicId);
+    //                 }
+    //             }
+    
+    //             $newSubImage3 = $this->uploadToCloudinary($request->file('subImage3'));
+    //             $product->subImage3 = $newSubImage3;
+    //         }
+    
+    //         //process the product price
+    //         // if($request->has('productName')){
+    //         //     // Update the name in the database
+    //         //     $product->productName = $request->input('productName');
+    //         // }
+    
+    //         // //process the product price
+    //         // if($request->has('productPrice12Inches')){
+    //         //     // Update the price in the database
+    //         //     $product->productPrice = $request->input('productPrice');
+    //         // }
+
+    //         $product->productName = $request->input('productName');
+    //         $product->productPrice12Inches = $request->input('productPrice12Inches');
+    //         $product->productPrice14Inches = $request->input('productPrice14Inches');
+    //         $product->productPrice16Inches = $request->input('productPrice16Inches');
+    //         $product->productPrice18Inches = $request->input('productPrice18Inches');
+    //         $product->productPrice20Inches = $request->input('productPrice20Inches');
+    //         $product->productPrice22Inches = $request->input('productPrice22Inches');
+    //         $product->productPrice24Inches = $request->input('productPrice24Inches');
+    //         $product->productPrice26Inches = $request->input('productPrice26Inches');
+    //         $product->productPrice28Inches = $request->input('productPrice28Inches');
+
+
+
+    
+    //         // Save the updated product in the database
+    //         $product->save();
+    //         $product->refresh();
+
+    //         //update the cache to hold the current data
+    //         $allProducts = Product::orderBy('created_at', 'desc')->get()->toArray();
+    //         // Cache::put('allProducts', json_encode($allProducts, true));
+    //         Cache::put('allProducts', $allProducts, now()->addWeek(1));
+    //         Cache::put("singleProduct_{$productId}", $product, 1440); //expiry date of 1 day in minutes
 
         
-    }
+    
+    //         return response()->json([
+    //             "code" => "success",
+    //             "message" => "Product updated successfully",
+    //         ]);
+    //     }catch(Exception $e){
+    //         return response()->json([
+    //             "code" => "error",
+    //             "message" => "An error occured while updating product",
+    //             "reason" => $e->getMessage()
+    //         ]);
+    //     }
+
+        
+    // }
 
     // function getPublicIdFromUrl($secureUrl){
     //     // First, remove the base URL (domain, resource type, etc.)
@@ -1111,7 +1371,7 @@ class ProductController extends Controller
     // }
 
 
-    public static function getPublicIdFromUrl($secureUrl) {
+    public static function getPublicIdFromUrl($secureUrl, $subFolder = null) {
         // Parse the URL
         $urlParts = parse_url($secureUrl);
         
@@ -1132,11 +1392,40 @@ class ProductController extends Controller
         $publicIdWithoutExtension = pathinfo($fileNameWithExtension, PATHINFO_FILENAME); // Get just the file name without extension
         
         // Return the public ID being preceeded by the public Id
-        return env('FOLDER_FOR_IMAGES_IN_CLOUDINARY') . '/' . $publicIdWithoutExtension ;
+        return env('FOLDER_FOR_IMAGES_IN_CLOUDINARY') . ($subFolder ? '/' . $subFolder : '') . '/' . $publicIdWithoutExtension;
     }
+// public static function getPublicIdFromUrl($secureUrl) {
+//     $urlParts = parse_url($secureUrl);
+//     $path = $urlParts['path'];
 
-    
-    
+//     // Remove '/image/upload/' base path
+//     $pathWithoutBase = str_replace('/image/upload/', '', $path);
+
+//     // Split path into parts
+//     $pathParts = explode('/', $pathWithoutBase);
+
+//     // Remove version part if present
+//     if (preg_match('/^v\d+$/', $pathParts[0])) {
+//         array_shift($pathParts);
+//     }
+
+//     // Remove file extension from last part
+//     $fileNameWithExtension = array_pop($pathParts);
+//     $fileName = pathinfo($fileNameWithExtension, PATHINFO_FILENAME);
+
+//     // Rebuild public ID with all subfolders intact
+//     $publicId = count($pathParts) ? implode('/', $pathParts) . '/' . $fileName : $fileName;
+
+//     return $publicId; // Do NOT prepend anything
+// }
+
+
+
+
+
+
+
+
 
 
     public function deleteProduct(Request $request){

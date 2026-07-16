@@ -13,6 +13,8 @@
 
 .each-product-category{
     background-color: rgb(233, 233, 233);
+    /* background-color: white;
+    box-shadow: 2px 2px 2px 2px rgb(233, 233, 233); */
     border-radius: 10px;
     /* padding: 20px 100px; */
     margin-top: 10px;
@@ -21,4 +23,5 @@
     display: flex;
     justify-content: space-between;
     flex-direction: column;
+
 }

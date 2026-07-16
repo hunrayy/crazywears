@@ -23,16 +23,18 @@ class VerifyAdminToken
             $bearerToken = $request->header('Authorization');
             if (!$bearerToken) {
                 return response()->json([
-                    'message' => 'Authorization token not provided',
+                    'message' => 'You are not logged in. Please sign in to continue.',
                     'code' => 'error',
+                    'reason' => 'Authorization token not provided',
                 ]);
             }
 
             $parts = explode(' ', $bearerToken);
             if (count($parts) !== 2 || strtolower($parts[0]) !== 'bearer') {
                 return response()->json([
-                    'message' => 'Malformed Authorization header',
+                    'message' => 'Your login session is invalid. Please log in again.',
                     'code' => 'error',
+                    'reason' => 'Malformed Authorization header',
                 ]);
             }
 
@@ -49,8 +51,9 @@ class VerifyAdminToken
 
             if (!$admin) {
                 return response()->json([
-                    'message' => 'Unauthorized: Admin not found',
+                    'message' => 'Account not found or access has been removed.',
                     'code' => 'error',
+                    'reason' => 'Unauthorized: Admin not found',
                 ]);
             }
 
@@ -66,8 +69,9 @@ class VerifyAdminToken
 
             if (!$role) {
                 return response()->json([
-                    'message' => 'Permission role not found',
+                    'message' => 'This action is not available right now.',
                     'code' => 'error',
+                    'reason' => 'Permission role not found',
                 ]);
             }
 
@@ -77,8 +81,9 @@ class VerifyAdminToken
 
             if (!is_array($userRolesArray)) {
                 return response()->json([
-                    'message' => 'Invalid role data format',
+                    'message' => 'Your account permissions are corrupted. Please contact support.',
                     'code' => 'error',
+                    'reason' => 'Invalid role data format',
                 ]);
             }
 
@@ -93,14 +98,15 @@ class VerifyAdminToken
 
         } catch (ExpiredException $e) {
             return response()->json([
-                'message' => 'JWT expired',
+                'message' => 'Your session has expired. Please log in again.',
                 'code' => 'invalid-jwt',
+                'user-friendly-reason' => 'JWT expired',
                 'reason' => $e->getMessage(),
             ]);
         } catch (\Exception $e) {
             Log::error('JWT Exception: ' . $e->getMessage());
             return response()->json([
-                'message' => 'Invalid JWT or internal error',
+                'message' => 'Something went wrong. Please try again.',
                 'code' => 'invalid-jwt',
                 'reason' => $e->getMessage(),
             ]);

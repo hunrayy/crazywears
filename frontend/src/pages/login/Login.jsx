@@ -120,11 +120,11 @@
 //               </div>
               
 //               <div style={{ display: "flex", justifyContent: "right", padding: "5px 10px 0 0" }}>
-//                 <Link style={{ color: "purple", textDecoration: "none" }}>Forgot password?</Link>
+//                 <Link style={{ color: "black", textDecoration: "none" }}>Forgot password?</Link>
 //               </div>
 
 //               <div className="d-grid">
-//                 <button className="btn btn-lg mt-4" style={{ backgroundColor: "purple", color: "white" }} type="submit">
+//                 <button className="btn btn-lg mt-4" style={{ backgroundColor: "black", color: "white" }} type="submit">
 //                   <b>Login</b>
 //                 </button>
 //               </div>
@@ -316,20 +316,99 @@ const Login = () => {
               </div>
               
               <div style={{display: "flex", justifyContent: "right", padding: "5px 10px 0 0"}}>
-                <Link to="/accounts/password/reset" style={{color: "purple", textDecoration: "none"}}>Forgot password?</Link>
+                <Link to="/accounts/password/reset" style={{textDecoration: "none"}}>Forgot password?</Link>
               </div>
 
+              {/* <div className="d-grid">
+                <button className="btn btn-lg mt-4" style={{backgroundColor: "black", color: "white"}} type="submit">
+                  <b>Login</b>
+                </button>
+              </div> */}
+
+
+
+
+
+
+
+
+
               <div className="d-grid">
-                <button className="btn btn-lg mt-4" style={{backgroundColor: "purple", color: "white"}} type="submit">
+                <button
+                  className="btn btn-lg mt-4"
+                  style={{ backgroundColor: "black", color: "white" }}
+                  type="submit"
+                >
                   <b>Login</b>
                 </button>
               </div>
+
+              {/* Divider */}
+              <div
+                className="my-4"
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "12px",
+                }}
+              >
+                <hr style={{ flex: 1, margin: 0 }} />
+                <span style={{ color: "#6c757d", fontSize: "14px" }}>OR</span>
+                <hr style={{ flex: 1, margin: 0 }} />
+              </div>
+
+              {/* Google Login */}
+              <div className="d-grid">
+                <button
+                  className="btn btn-lg border"
+                  type="button"
+                  onClick={() => {
+                    window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/google`;
+                  }}
+                  style={{
+                    backgroundColor: "#fff",
+                    color: "#333",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "10px",
+                  }}
+                >
+                  <i
+                    className="fa-brands fa-google"
+                    style={{ color: "#4285F4" }}
+                  ></i>
+                  Continue with Google
+                </button>
+              </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
             </div>
           </form>
           <div>
-            <small>Don't have an account yet? <Link to = "/identification" style={{textDecoration: "none", color: "purple"}}>Register</Link> </small>
+            <small>Don't have an account yet? <Link to = "/identification" style={{textDecoration: "none"}}>Register</Link> </small>
           </div>
-          <small style={{padding: "0 10px 0 10px"}}>By continuing you agree to beautybykiara’s Terms and Conditions</small>
+          <small style={{padding: "0 20px"}}>By continuing you agree to beautybykiara’s Terms and Conditions</small>
 
 
 
@@ -339,7 +418,7 @@ const Login = () => {
 
 
 
-<div className="d-grid mt-3">
+{/* <div className="d-grid mt-3">
   <button 
     className="btn btn-lg" 
     style={{backgroundColor: "#4285F4", color: "white"}} 
@@ -351,7 +430,7 @@ const Login = () => {
   >
     <i className="fa-brands fa-google me-2"></i> Continue with Google
   </button>
-</div>
+</div> */}
 
 
 
