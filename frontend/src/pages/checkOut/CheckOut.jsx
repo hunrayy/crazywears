@@ -238,12 +238,13 @@ const CheckOut = () => {
     //   toast.error("Failed to fetch countries and states. Please try again later.");
     // })
 
-    axios.get(`${import.meta.env.VITE_BACKEND_URL}/get-all-countries-and-states`, { timeout: 10000 }) // timeout set to 10 seconds
+    axios.get(`${import.meta.env.VITE_BACKEND_URL}/get-all-countries-and-   `, { timeout: 10000 }) // timeout set to 10 seconds
     .then((feedback) => {
       console.log(feedback)
       setCountries(feedback.data.data.data)
     }).catch((error) => {
       // console.error("Error fetching countries and states:", error)
+      console.log("Error fetching countries and states:", error)
       toast.error("Failed to fetch countries and states. Please try again later.");
     })
 

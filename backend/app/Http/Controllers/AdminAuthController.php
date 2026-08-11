@@ -44,7 +44,7 @@ class AdminAuthController extends Controller
                 return response()->json(['message' => 'Invalid email/password', 'code' => 'error']);
             }
     
-            // $shipping = Shipping::first();
+            // $shipping = Shipping::first();       
             // Prepare the payload for JWT
             $payload = [
                 'userId' => $admin->id,

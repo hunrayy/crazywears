@@ -1210,7 +1210,7 @@ class ProductController extends Controller
                 "reason" => $e->getMessage()
             ]);
         }
-    }
+    } 
     
 
 

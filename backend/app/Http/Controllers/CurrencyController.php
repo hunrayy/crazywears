@@ -42,45 +42,85 @@ class CurrencyController extends Controller
         try {
             // Cache key and TTL (30 days)
             $cacheKey = 'currency_data_array';
-            $ttl = 60 * 60 * 24 * 30;
+            $ttl = 60 * 60 * 24 * 30; //30 days
 
             // Return from cache if exists
             if (Cache::has($cacheKey)) {
-                return response()->json(Cache::get($cacheKey));
+
+                return response()->json([
+                    'code' => 'success',
+                    'message' => 'currency data successfully retrieved from cache',
+                    'data' => Cache::get($cacheKey)
+                ]);
             }
 
             // Fetch from external API
-            $response = Http::get('https://restcountries.com/v3.1/all?fields=name,currencies');
+            // $response = Http::get('https://restcountries.com/v3.1/all?fields=name,currencies');
 
-            if ($response->failed()) {
-                return response()->json(['code' => 'error', 'message' => 'Failed to fetch currency data'], 500);
+            // if ($response->failed()) {
+            //     return response()->json(['code' => 'error', 'message' => 'Failed to fetch currency data'], 500);
+            // }
+
+
+            // Read currency data from local JSON file
+            $path = resource_path(
+                'countries-states-currencies/countries-states-currencies.json'
+            );
+
+            if (!file_exists($path)) {
+                return response()->json([
+                    'code' => 'error',
+                    'message' => 'Currency data file not found'
+                ], 500);
+            }
+            
+            $currencyArray = json_decode(
+                file_get_contents($path),
+                true
+            );
+
+                
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return response()->json([
+                    'code' => 'error',
+                    'message' => 'Invalid currency JSON data'
+                ], 500);
             }
 
-            $rawData = $response->json();
+            // return response()->json($currencyArray);
+
+            // $rawData = $response->json();
+            $rawData = $currencyArray;
             $currencyMap = [];
 
-            // Collect unique currencies
-            foreach ($rawData as $country) {
-                if (!isset($country['currencies'])) continue;
+            foreach ($currencyArray as $country) {
 
-                foreach ($country['currencies'] as $code => $details) {
-                    if (!isset($currencyMap[$code])) {
-                        $currencyMap[$code] = [
-                            'code' => $code,
-                            'symbol' => $details['symbol'] ?? '',
-                            'name' => $details['name'] ?? '',
-                        ];
-                    }
+                $code = $country['currency_code'] ?? null;
+
+                if (!$code) {
+                    continue;
+                }
+
+                if (!isset($currencyMap[$code])) {
+                    $currencyMap[$code] = [
+                        'country' => $country['country'] ?? '',
+                        'code' => $code,
+                        'symbol' => $country['currency_symbol'] ?? '',
+                    ];
                 }
             }
 
-            // Convert to indexed array
             $currencyArray = array_values($currencyMap);
+
 
             // Store in cache
             Cache::put($cacheKey, $currencyArray, $ttl);
 
-            return response()->json($currencyArray);
+            return response()->json([
+                'code' => 'success',
+                'message' => 'currency data fetched successfully from json file',
+                'data' => $currencyArray
+            ]);
 
         } catch (\Exception $e) {
             return response()->json([
@@ -158,7 +198,7 @@ class CurrencyController extends Controller
             return response()->json([
                 'message' => 'Failed to fetch countries and states',
                 'code' => 'error',
-                'error' => $e
+                'error' => $e->getMessage()
             ]);
         }
 

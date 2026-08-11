@@ -27,6 +27,7 @@ import AdminForgotPassword from "./pages/adminForgotPassword/AdminForgotPassword
 import AdminResetPassword from "./pages/adminResetPassword/AdminResetPassword"
 import TrackingPage from "./pages/trackingPage/trackingPage"
 import Policies from "./pages/policies/Policies"
+import Test from "./pages/test/Test"
 
 function App() {
   
@@ -150,6 +151,7 @@ function App() {
         <CartProvider>
           <Routes>
             <Route path="/" element={<Home />} />
+            <Route path="/test" element={<Test />} />
             <Route path="/collections/:category" element={<AllProducts />} />
             <Route path="/product/:productId" element={<SingleProduct />} />
             <Route path="/cart" element={<Cart />} />
@@ -180,3 +182,5 @@ function App() {
 }
 
 export default App
+
+

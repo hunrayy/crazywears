@@ -1,27 +1,49 @@
+
 import { useMemo } from "react";
 import axios from "axios";
 import { useQuery } from "@tanstack/react-query";
 
 const fetchProduct = async (productId) => {
+  console.log("➡️ Starting request");
+
   const { data } = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/get-single-product?productId=${productId}`);
+  console.log("⬅️ Response received");
+  
   console.log(data)
+
   return data;
 };
 
 export const useSingleProduct = (productId) => {
-  const { data, isLoading, error } = useQuery({
+  console.log("useSingleProduct module loaded");  
+  const { data, isLoading, error, status, fetchStatus } = useQuery({
     queryKey: ["singleProduct", productId],
     queryFn: () => fetchProduct(productId),
-    staleTime: 5 * 60 * 1000,
     enabled: !!productId,
-    cacheTime: 30 * 60 * 1000,
+    // staleTime: 5 * 60 * 1000,
+    // cacheTime: 30 * 60 * 1000,
     refetchOnMount: false,
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });
 
+  console.log({
+    status,
+    fetchStatus,
+    isLoading,
+    error,
+    data,
+  });
+
   const { product, productSizes, productPrices, pageNotFound } = useMemo(() => {
+    
+    console.log("data:", data);
+    console.log("data?.code:", data?.code);
+    console.log("condition:", !data || data.code !== "success");
+
     if (!data || data.code !== "success") {
+      console.log("RETURNING EARLY");
+
       return {
         product: {},
         productSizes: [],
@@ -29,9 +51,13 @@ export const useSingleProduct = (productId) => {
         pageNotFound: true,
       };
     }
+    console.log(`from useSingleProduct hook: ${data.data}`)
 
+    console.log("AFTER IF");
+    console.log("hello from here")
     const productData = typeof data.data === "string" ? JSON.parse(data.data) : data.data;
-
+    console.log("hello from the other side")
+      console.log(productData)
     // const sizes = JSON.parse(productData.productPrices).filter(item => parseFloat(item.price) > 0);
       // Parse productPrices
       // console.log(sizes)
@@ -42,6 +68,7 @@ export const useSingleProduct = (productId) => {
         console.log(sizes.map(item => item.price))
 
     
+        console.log(sizes)
 
     return {
       product: {
@@ -58,12 +85,15 @@ export const useSingleProduct = (productId) => {
         pageNotFound: false,
       },
       productSizes: sizes.map(item => item.size),
-      productPrices: sizes.map(item => (item.price)),
+      productPrices: sizes.map(item => Number(item.price)),
       pageNotFound: false,
     };
   }, [data]);
 
+  console.log(product);
+
   return { product, productSizes, productPrices, isLoading, error, pageNotFound };
+  // return { product: productData };
 };
 
 

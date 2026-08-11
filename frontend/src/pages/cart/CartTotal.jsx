@@ -1,54 +1,133 @@
-// CartTotal.jsx
-import React, { useContext } from 'react';
-import { CartContext } from './CartContext';
-import { CurrencyContext } from '../../components/all_context/CurrencyContext';
+import React, { useContext } from "react";
+import { CartContext } from "./CartContext";
+import { CurrencyContext } from "../../components/all_context/CurrencyContext";
 
-/**
- * Calculate total cart price
- * @param {Object} cartProducts - Cart context products
- * @param {Function} convertCurrency - Function to convert currency
- * @param {string} selectedCurrency - Selected currency code
- * @returns {number} total price in selected currency
- */
+
+
 export const calculateTotal = (cartProducts, convertCurrency, selectedCurrency) => {
   if (!cartProducts || !Array.isArray(cartProducts.products)) return 0;
 
   const total = cartProducts.products.reduce((acc, item) => {
-    // Parse productPrices JSON safely
-    const prices = JSON.parse(item.productPrices || "[]");
-
-    // Find the variant price
-    const variantPrice = prices.find(p => p.size === item.variant?.size)?.price;
-
-    // Fallback: updatedPrice or 0
-    const unitPrice = Number(variantPrice || item.updatedPrice || 0);
-
-    return acc + unitPrice * item.quantity;
+    return acc + Number(item.productPrice) * item.quantity;
   }, 0);
 
   return convertCurrency(total, import.meta.env.VITE_CURRENCY_CODE, selectedCurrency);
 };
 
+
 const CartTotal = () => {
-  
+  // const { cartProducts } = useContext(CartContext);
+  // const {
+  //   currencySymbols,
+  //   selectedCurrency,
+  //   convertCurrency
+  // } = useContext(CurrencyContext);
+
+  // const total = calculateTotal(
+  //   cartProducts,
+  //   convertCurrency,
+  //   selectedCurrency
+  // );
+
+  // return (
+  //   <span>
+  //     {currencySymbols[selectedCurrency]}
+  //     {Number(total).toLocaleString()}
+  //   </span>
+  // );
   const { cartProducts } = useContext(CartContext);
-  const { selectedCurrency, convertCurrency, currencySymbols } = useContext(CurrencyContext);
+  const { currencySymbols, selectedCurrency } = useContext(CurrencyContext);
 
-  const total = calculateTotal(cartProducts, convertCurrency, selectedCurrency);
-
-  const currencySymbol = currencySymbols[selectedCurrency] || '';
-  const formattedTotal = Number(total).toLocaleString();
-
-  console.log("Cart products:", cartProducts.products);
-console.log("Total before conversion:", total);
-console.log("Converted total:", convertCurrency(total, import.meta.env.VITE_CURRENCY_CODE, selectedCurrency));
-
+  const currencySymbol = currencySymbols[selectedCurrency] || "";
+  console.log(cartProducts)
   return (
-    <span className="mb-2">{currencySymbol} {formattedTotal}</span>
+    <span className="mb-2">
+      {currencySymbol} {Number(cartProducts.totalPrice).toLocaleString()}
+    </span>
   );
 };
 
 export default CartTotal;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// // CartTotal.jsx
+// import React, { useContext } from 'react';
+// import { CartContext } from './CartContext';
+// import { CurrencyContext } from '../../components/all_context/CurrencyContext';
+
+// /**
+//  * Calculate total cart price
+//  * @param {Object} cartProducts - Cart context products
+//  * @param {Function} convertCurrency - Function to convert currency
+//  * @param {string} selectedCurrency - Selected currency code
+//  * @returns {number} total price in selected currency
+//  */
+// export const calculateTotal = (cartProducts, convertCurrency, selectedCurrency) => {
+//   if (!cartProducts || !Array.isArray(cartProducts.products)) return 0;
+
+//   const total = cartProducts.products.reduce((acc, item) => {
+//     // Parse productPrices JSON safely
+//     // const prices = JSON.parse(item.productPrices || "[]");
+//     const prices = item.productPrices;
+//     console.log(item)
+
+//     // Find the variant price
+//     const variantPrice = prices?.find(p => p.size === item.variant?.size)?.price;
+
+//     // Fallback: updatedPrice or 0
+//     const unitPrice = Number(variantPrice || item.updatedPrice || 0);
+
+//     return acc + unitPrice * item.quantity;
+//   }, 0);
+
+//   return convertCurrency(total, import.meta.env.VITE_CURRENCY_CODE, selectedCurrency);
+// };
+
+// const CartTotal = () => {
+  
+//   const { cartProducts } = useContext(CartContext);
+//   const { selectedCurrency, convertCurrency, currencySymbols } = useContext(CurrencyContext);
+
+//   const total = calculateTotal(cartProducts, convertCurrency, selectedCurrency);
+
+//   const currencySymbol = currencySymbols[selectedCurrency] || '';
+//   const formattedTotal = Number(total).toLocaleString();
+//   console.log(total)
+
+//   console.log("Cart products:", cartProducts.products);
+// console.log("Total before conversion:", total);
+// console.log("Converted total:", convertCurrency(total, import.meta.env.VITE_CURRENCY_CODE, selectedCurrency));
+
+//   return (
+//     <span className="mb-2">{currencySymbol} {formattedTotal}</span>
+//   );
+// };
+
+// export default CartTotal;
 
 
 

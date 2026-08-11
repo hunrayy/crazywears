@@ -15,7 +15,7 @@ const Cart = () => {
 
   const { selectedCurrency, convertCurrency, currencySymbols } = useContext(CurrencyContext);
   const { loading, cartProducts, addToCart, updateCartItemQuantity } = useContext(CartContext);
-
+console.log(cartProducts)
   const [allCartItems, setAllCartItems] = useState({ products: [] });
   const [removeItemFromCartModal, setRemoveItemFromCartModal] = useState({
     show: false,
@@ -40,7 +40,9 @@ const Cart = () => {
       updateCartItemQuantity(each_item.id, each_item.quantity - 1);
     }
   };
-
+  console.log("selectedCurrency:", selectedCurrency);
+  console.log("currencySymbols:", currencySymbols);
+  console.log("currencySymbol:", currencySymbols[selectedCurrency]);
   const currencySymbol = currencySymbols[selectedCurrency];
 
   if (loading) {
@@ -63,7 +65,7 @@ const Cart = () => {
             </div>
             <p>Do you really want to remove this item from cart?</p>
             <div style={{ display: "flex", gap: "20px" }}>
-              <button className="btn" style={{ border: "1px solid purple", width: "100%", padding: "10px" }}
+              <button className="btn" style={{ border: "1px solid black", width: "100%", padding: "10px" }}
                 onClick={() => setRemoveItemFromCartModal({ show: false, eachItem: null })}>
                 Cancel
               </button>
@@ -76,7 +78,7 @@ const Cart = () => {
               <button
                 className="btn"
                 style={{
-                  background: "purple",
+                  background: "black",
                   color: "white",
                   width: "100%",
                   display: "flex",
@@ -112,7 +114,7 @@ const Cart = () => {
       </div>
 
       {/* Empty cart message */}
-      {cartProducts.cartEmpty && !loading ? <EmptyCart /> : null}
+      {!loading && cartProducts.products.length === 0 && <EmptyCart />}
 
       {/* Cart items */}
       <section className="my-5" style={cartProducts.products?.length === 0 ? { display: "none" } : null}>
@@ -124,28 +126,63 @@ const Cart = () => {
                   <h4 className="card-title mb-4">Your shopping cart</h4>
 
                   {cartProducts.products?.slice().reverse().map((each_item) => {
-                    const productPrices = JSON.parse(each_item.productPrices || "[]");
-
-                    // Match stored variant
-                    const matchedVariant = productPrices.find(v =>
-                      Object.keys(each_item.variant || {}).every(key => v[key] === each_item.variant[key])
-                    ) || {};
-
-                    const unitPrice = Number(convertCurrency(matchedVariant.price || each_item.defaultPrice, import.meta.VITE_CURRENCY_CODE, selectedCurrency));
+                    console.log(each_item)
+                    // const productPrices = JSON.parse(each_item.productPrices || "[]");
+                    const unitPrice = Number(
+                      convertCurrency(
+                        each_item.productPrice,
+                        import.meta.env.VITE_CURRENCY_CODE,
+                        selectedCurrency
+                      )
+                    );
                     const totalPrice = unitPrice * each_item.quantity;
 
                     return (
                       <div key={each_item.id} className="cart-products-wrapper mb-3">
                         <div className="col-lg-5">
                           <div className="d-flex" style={{flexWrap: "wrap"}}>
-                            <img
-                              src={each_item.productImage}
-                              className="border rounded me-3"
-                              style={{ width: "100px", height: "130px", cursor: "pointer" }}
+                            {/* <img
+                              src={each_item.mainProductMedia}
+                              // className="border rounded me-3"
+                              className="me-3"
+
+                              // style={{ width: "100px", height: "130px", cursor: "pointer", objectFit: "contain" }}
+                              style={{ width: "100%", height: "100%", maxHeight: "130px", maxWidth: "100px", cursor: "pointer", objectFit: "contain", borderRadius: "20px" }}
                               onClick={() => navigate(`/product/${each_item.id}`)}
-                            />
+                            /> */}
+
+                            <div
+                              style={{
+                                width: "90px",
+                                height: "120px",
+                                // border: "1px solid #dee2e6",
+                                // borderRadius: "10px",
+                                overflow: "hidden",
+                                marginRight: "1rem",
+                                flexShrink: 0,
+                                display: "flex",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                // background: "#fff"
+                                // background: "red"
+                              }}
+                            >
+                              <img
+                                src={each_item.mainProductMedia}
+                                style={{
+                                  maxWidth: "100%",
+                                  maxHeight: "100%",
+                                  width: "auto",
+                                  height: "auto",
+                                  objectFit: "contain",
+                                  borderRadius: "10px",
+                                  display: "block",
+                                  cursor: "pointer"
+                                }}
+                              />
+                            </div>
                             <div>
-                              <p className="nav-link">{each_item.productName}</p>
+                              <p className="nav-link">{each_item.name}</p>
                               {/* {each_item.variant && Object.keys(each_item.variant).length > 0 && (
                                 <small>
                                   <b>Variant:</b> {Object.entries(each_item.variant).map(([k,v]) => `${v}`).join(", ")}

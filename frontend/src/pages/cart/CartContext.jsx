@@ -6,7 +6,7 @@ import axios from 'axios';
 export const CartContext = createContext();
 
 const CartProvider = ({ children }) => {
-  const { selectedCurrency, convertCurrency } = useContext(CurrencyContext);
+  const { selectedCurrency, convertCurrency, ratesFetched } = useContext(CurrencyContext);
 
   const [cartProducts, setCartProducts] = useState({
     products: [],
@@ -38,11 +38,12 @@ const CartProvider = ({ children }) => {
     }
 
     const arrayOfIds = storedItems.map(item => item.id);
-
+    console.log("Stored Items:", storedItems);
     try {
       const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/get-product-details`, {
         params: { ids: arrayOfIds }
       });
+      console.log(response.data);
 
       if (response.data.code === 'success') {
         const validIds = response.data.data.map(productDetail => productDetail.id);
@@ -52,29 +53,72 @@ const CartProvider = ({ children }) => {
           localStorage.setItem('cart_items', JSON.stringify(validStoredItems));
         }
 
+
+
         const mergedProducts = validStoredItems.map(storedItem => {
           const productDetail = response.data.data.find(p => p.id === storedItem.id);
+
+          console.log("Stored Item:", storedItem);
+          console.log("Product Detail:", productDetail);
+
           if (!productDetail) return null;
 
-          // compute price dynamically from the variant
-          const variantPrice = productDetail.productPrices
-            ? JSON.parse(productDetail.productPrices).find(v => JSON.stringify(v) === JSON.stringify(storedItem.variant))?.price
-            : productDetail.defaultPrice;
+          console.log("productPrices:", productDetail.productPrices);
 
-          const convertedPrice = Number(
-            convertCurrency(variantPrice, import.meta.env.VITE_CURRENCY_CODE, selectedCurrency)
+          let prices = [];
+
+          if (Array.isArray(productDetail.productPrices)) {
+            prices = productDetail.productPrices;
+          } else if (typeof productDetail.productPrices === "string") {
+            prices = JSON.parse(productDetail.productPrices);
+          }
+
+          console.log("Prices:", prices);
+
+          const matchedVariant = prices.find(
+            v => v.size === storedItem.variant?.size
           );
 
+          console.log("Matched Variant:", matchedVariant);
+
+          const variantPrice = matchedVariant?.price ?? productDetail.defaultPrice;
           return {
             ...productDetail,
+            productPrices: Array.isArray(productDetail.productPrices)
+              ? productDetail.productPrices
+              : JSON.parse(productDetail.productPrices || "[]"),
             quantity: storedItem.quantity || 1,
             variant: storedItem.variant,
-            productPrice: variantPrice, // dynamic, not from localStorage
-            updatedPrice: !isNaN(convertedPrice) ? convertedPrice.toLocaleString() : '0'
+            productPrice: variantPrice
           };
-        }).filter(Boolean);
+        });
 
+        console.log("Merged Products:", mergedProducts);
+
+
+        // const mergedProducts = validStoredItems.map(storedItem => {
+        //   const productDetail = response.data.data.find(p => p.id === storedItem.id);
+        //   if (!productDetail) return null;
+
+        //   // compute price dynamically from the variant
+        //   const variantPrice = productDetail.productPrices
+        //     ? JSON.parse(productDetail.productPrices).find(v => JSON.stringify(v) === JSON.stringify(storedItem.variant))?.price
+        //     : productDetail.defaultPrice;
+
+        //   const convertedPrice = Number(
+        //     convertCurrency(variantPrice, import.meta.env.VITE_CURRENCY_CODE, selectedCurrency)
+        //   );
+
+        //   return {
+        //     ...productDetail,
+        //     quantity: storedItem.quantity || 1,
+        //     variant: storedItem.variant,
+        //     productPrice: variantPrice, // dynamic, not from localStorage
+        //     updatedPrice: !isNaN(convertedPrice) ? convertedPrice.toLocaleString() : '0'
+        //   };
+        // }).filter(Boolean);
         const totalPrice = calculateTotalPrice(mergedProducts);
+        console.log("Calculated total:", totalPrice);
         setLoading(false);
 
         return {
@@ -87,6 +131,7 @@ const CartProvider = ({ children }) => {
         return { products: [], totalPrice: 0, cartEmpty: true };
       }
     } catch (error) {
+      console.log(error);
       setLoading(false);
       return { products: [], totalPrice: 0, cartEmpty: true };
     }
@@ -98,44 +143,116 @@ const CartProvider = ({ children }) => {
       setCartProducts(result);
     };
     fetchCartProducts();
-  }, [selectedCurrency]); // If currency changes, we want to refetch the price
+  }, [selectedCurrency, ratesFetched]); // If currency changes, we want to refetch the price
+
 
   const addToCart = (product, variant) => {
-    setCartProducts(prev => {
-      const existingIndex = prev.products.findIndex(
-        item =>
-          item.id === product.id &&
-          JSON.stringify(item.variant) === JSON.stringify(variant)
-      );
+    // Determine the selected variant price
+    const matchedVariant = product.productPricesArray?.find(
+      p => p.size.toLowerCase() === variant.size.toLowerCase()
+    );
 
+    const productPrice = Number(
+      matchedVariant?.price ?? product.defaultPrice ?? 0
+    );
+    // Read localStorage
+    let storedItems = JSON.parse(localStorage.getItem("cart_items")) || [];
+
+    const existingIndex = storedItems.findIndex(
+      item =>
+        item.id === product.id &&
+        JSON.stringify(item.variant) === JSON.stringify(variant)
+    );
+
+    setCartProducts(prev => {
       let updatedProducts;
 
       if (existingIndex !== -1) {
-        updatedProducts = prev.products.filter((_, i) => i !== existingIndex);
+        // Remove from localStorage
+        storedItems.splice(existingIndex, 1);
+
+        // Remove from React state
+        updatedProducts = prev.products.filter(
+          item =>
+            !(
+              item.id === product.id &&
+              JSON.stringify(item.variant) === JSON.stringify(variant)
+            )
+        );
+
         toast.success("Product removed from cart");
       } else {
+        // Save minimal data to localStorage
+        storedItems.push({
+          id: product.id,
+          variant,
+          quantity: 1
+        });
+
+        // Save full object to React state
         updatedProducts = [
           ...prev.products,
           {
-            id: product.id,
+            ...product,
             variant,
-            quantity: 1
+            quantity: 1,
+            productPrice
           }
         ];
+
         toast.success("Product added successfully");
       }
 
-      const updatedCart = {
+      localStorage.setItem(
+        "cart_items",
+        JSON.stringify(storedItems)
+      );
+      console.log(updatedProducts);
+
+      return {
         ...prev,
-        products: updatedProducts
+        products: updatedProducts,
+        totalPrice: calculateTotalPrice(updatedProducts)
       };
-
-      // persist to localStorage
-      localStorage.setItem("cart_items", JSON.stringify(updatedProducts));
-
-      return updatedCart;
     });
   };
+
+  // const addToCart = (product, variant) => {
+  //   setCartProducts(prev => {
+  //     const existingIndex = prev.products.findIndex(
+  //       item =>
+  //         item.id === product.id &&
+  //         JSON.stringify(item.variant) === JSON.stringify(variant)
+  //     );
+
+  //     let updatedProducts;
+
+  //     if (existingIndex !== -1) {
+  //       updatedProducts = prev.products.filter((_, i) => i !== existingIndex);
+  //       toast.success("Product removed from cart");
+  //     } else {
+  //       updatedProducts = [
+  //         ...prev.products,
+  //         {
+  //           id: product.id,
+  //           variant,
+  //           quantity: 1
+  //         }
+  //       ];
+  //       toast.success("Product added successfully");
+  //     }
+
+  //     const updatedCart = {
+  //       ...prev,
+  //       products: updatedProducts
+  //     };
+
+  //     // persist to localStorage
+  //     localStorage.setItem("cart_items", JSON.stringify(updatedProducts));
+
+  //     return updatedCart;
+  //   });
+  // };
 
   // const addToCart = async (product, variant) => {
   //   let getItems = JSON.parse(localStorage.getItem('cart_items')) || [];
@@ -192,13 +309,17 @@ const CartProvider = ({ children }) => {
       item.id === productId ? { ...item, quantity: newQuantity } : item
     );
 
-    localStorage.setItem("cart_items", JSON.stringify(
-      updatedItems.map(item => ({
-        id: item.id,
-        quantity: item.quantity,
-        lengthPicked: item.lengthPicked
-      }))
-    ));
+    localStorage.setItem(
+      "cart_items",
+      JSON.stringify(
+        updatedItems.map(item => ({
+          id: item.id,
+          variant: item.variant,
+          quantity: item.quantity,
+          lengthPicked: item.lengthPicked
+        }))
+      )
+    );
 
     setCartProducts(prev => ({
       ...prev,
@@ -244,6 +365,635 @@ const CartProvider = ({ children }) => {
 };
 
 export default CartProvider;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import React, { createContext, useState, useEffect, useContext, useMemo } from 'react';
+// import { CurrencyContext } from '../../components/all_context/CurrencyContext';
+// import { toast } from "react-toastify";
+// import axios from 'axios';
+
+// export const CartContext = createContext();
+
+// const CartProvider = ({ children }) => {
+//   const { selectedCurrency, convertCurrency } = useContext(CurrencyContext);
+
+//   const [cartProducts, setCartProducts] = useState({
+//     products: [],
+//     totalPrice: 0,
+//   });
+//   const [loading, setLoading] = useState(true);
+
+//   const lengthsOfHair = [
+//     `12", 12", 12"`, `14", 14", 14"`, `16", 16", 16"`, `18", 18", 18"`,
+//     `20", 20", 20"`, `22", 22", 22"`, `24", 24", 24"`, `26", 26", 26"`, `28", 28", 28"`,
+//   ];
+
+//   const calculateTotalPrice = (products) => {
+//     let total = 0;
+//     products?.forEach(product => {
+//       const convertedPrice = convertCurrency(product.productPrice, import.meta.env.VITE_CURRENCY_CODE, selectedCurrency);
+//       if (!isNaN(convertedPrice)) {
+//         total += parseFloat(convertedPrice) * (product.quantity || 1);
+//       }
+//     });
+//     return total.toFixed(2);
+//   };
+
+//   const initializeCartProducts = async () => {
+//     const storedItems = JSON.parse(localStorage.getItem('cart_items')) || [];
+//     if (!storedItems || storedItems.length === 0) {
+//       setLoading(false);
+//       return { products: [], totalPrice: 0, cartEmpty: true };
+//     }
+
+//     const arrayOfIds = storedItems.map(item => item.id);
+//     console.log("Stored Items:", storedItems);
+//     try {
+//       const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/get-product-details`, {
+//         params: { ids: arrayOfIds }
+//       });
+//       console.log(response.data);
+
+//       if (response.data.code === 'success') {
+//         const validIds = response.data.data.map(productDetail => productDetail.id);
+//         const validStoredItems = storedItems.filter(item => validIds.includes(item.id));
+
+//         if (validStoredItems.length !== storedItems.length) {
+//           localStorage.setItem('cart_items', JSON.stringify(validStoredItems));
+//         }
+
+
+
+//         const mergedProducts = validStoredItems.map(storedItem => {
+//           const productDetail = response.data.data.find(p => p.id === storedItem.id);
+
+//           console.log("Stored Item:", storedItem);
+//           console.log("Product Detail:", productDetail);
+
+//           if (!productDetail) return null;
+
+//           console.log("productPrices:", productDetail.productPrices);
+
+//           let prices = [];
+
+//           if (Array.isArray(productDetail.productPrices)) {
+//             prices = productDetail.productPrices;
+//           } else if (typeof productDetail.productPrices === "string") {
+//             prices = JSON.parse(productDetail.productPrices);
+//           }
+
+//           console.log("Prices:", prices);
+
+//           const matchedVariant = prices.find(
+//             v => v.size === storedItem.variant?.size
+//           );
+
+//           console.log("Matched Variant:", matchedVariant);
+
+//           const variantPrice = matchedVariant?.price ?? productDetail.defaultPrice;
+//           return {
+//             ...productDetail,
+//             productPrices: Array.isArray(productDetail.productPrices)
+//               ? productDetail.productPrices
+//               : JSON.parse(productDetail.productPrices || "[]"),
+//             quantity: storedItem.quantity || 1,
+//             variant: storedItem.variant,
+//             productPrice: variantPrice
+//           };
+//         });
+
+//         console.log("Merged Products:", mergedProducts);
+
+
+//         // const mergedProducts = validStoredItems.map(storedItem => {
+//         //   const productDetail = response.data.data.find(p => p.id === storedItem.id);
+//         //   if (!productDetail) return null;
+
+//         //   // compute price dynamically from the variant
+//         //   const variantPrice = productDetail.productPrices
+//         //     ? JSON.parse(productDetail.productPrices).find(v => JSON.stringify(v) === JSON.stringify(storedItem.variant))?.price
+//         //     : productDetail.defaultPrice;
+
+//         //   const convertedPrice = Number(
+//         //     convertCurrency(variantPrice, import.meta.env.VITE_CURRENCY_CODE, selectedCurrency)
+//         //   );
+
+//         //   return {
+//         //     ...productDetail,
+//         //     quantity: storedItem.quantity || 1,
+//         //     variant: storedItem.variant,
+//         //     productPrice: variantPrice, // dynamic, not from localStorage
+//         //     updatedPrice: !isNaN(convertedPrice) ? convertedPrice.toLocaleString() : '0'
+//         //   };
+//         // }).filter(Boolean);
+
+//         const totalPrice = calculateTotalPrice(mergedProducts);
+//         setLoading(false);
+
+//         return {
+//           products: mergedProducts,
+//           totalPrice,
+//           cartEmpty: mergedProducts.length === 0
+//         };
+//       } else {
+//         setLoading(false);
+//         return { products: [], totalPrice: 0, cartEmpty: true };
+//       }
+//     } catch (error) {
+//       console.log(error);
+//       setLoading(false);
+//       return { products: [], totalPrice: 0, cartEmpty: true };
+//     }
+//   };
+
+//   useEffect(() => {
+//     const fetchCartProducts = async () => {
+//       const result = await initializeCartProducts();
+//       setCartProducts(result);
+//     };
+//     fetchCartProducts();
+//   }, [selectedCurrency]); // If currency changes, we want to refetch the price
+
+//   const addToCart = (product, variant) => {
+//     setCartProducts(prev => {
+//       const existingIndex = prev.products.findIndex(
+//         item =>
+//           item.id === product.id &&
+//           JSON.stringify(item.variant) === JSON.stringify(variant)
+//       );
+
+//       let updatedProducts;
+
+//       if (existingIndex !== -1) {
+//         updatedProducts = prev.products.filter((_, i) => i !== existingIndex);
+//         toast.success("Product removed from cart");
+//       } else {
+//         updatedProducts = [
+//           ...prev.products,
+//           {
+//             id: product.id,
+//             variant,
+//             quantity: 1
+//           }
+//         ];
+//         toast.success("Product added successfully");
+//       }
+
+//       const updatedCart = {
+//         ...prev,
+//         products: updatedProducts
+//       };
+
+//       // persist to localStorage
+//       localStorage.setItem("cart_items", JSON.stringify(updatedProducts));
+
+//       return updatedCart;
+//     });
+//   };
+
+//   // const addToCart = async (product, variant) => {
+//   //   let getItems = JSON.parse(localStorage.getItem('cart_items')) || [];
+
+//   //   const existingIndex = getItems.findIndex(
+//   //     item => item.id === product.id && JSON.stringify(item.variant) === JSON.stringify(variant)
+//   //   );
+
+//   //   if (existingIndex !== -1) {
+//   //     getItems.splice(existingIndex, 1);
+//   //     toast.success("Product removed from cart");
+//   //   } else {
+//   //     // store only id, variant, quantity
+//   //     getItems.push({
+//   //       id: product.id,
+//   //       variant, // no price here!
+//   //       quantity: 1
+//   //     });
+//   //     toast.success("Product added successfully");
+//   //   }
+
+//   //   localStorage.setItem('cart_items', JSON.stringify(getItems));
+
+//   //   const result = await initializeCartProducts(); // fetch price dynamically
+//   //   setCartProducts(result);
+//   // };
+
+//   const updateCartItemLength = (productId, newLength, lengthPrice) => {
+//     const storedItems = JSON.parse(localStorage.getItem("cart_items")) || [];
+//     const storedItem = storedItems.find(item => item.id === productId);
+//     if (!storedItem) return;
+
+//     storedItem.lengthPicked = newLength;
+
+//     const updatedItems = cartProducts.products.map(item =>
+//       item.id === productId
+//         ? { ...item, lengthPicked: newLength, productPrice: lengthPrice }
+//         : item
+//     );
+
+//     localStorage.setItem("cart_items", JSON.stringify(storedItems));
+//     setCartProducts(prev => ({ ...prev, products: updatedItems }));
+//     toast.success('Length of product updated in cart');
+//   };
+
+//   const updateCartItemQuantity = (productId, newQuantity) => {
+//     const storedItems = JSON.parse(localStorage.getItem("cart_items")) || [];
+//     const storedItem = storedItems.find(item => item.id === productId);
+//     if (!storedItem) return;
+
+//     storedItem.quantity = newQuantity;
+
+//     const updatedItems = cartProducts.products.map(item =>
+//       item.id === productId ? { ...item, quantity: newQuantity } : item
+//     );
+
+//     localStorage.setItem(
+//       "cart_items",
+//       JSON.stringify(
+//         updatedItems.map(item => ({
+//           id: item.id,
+//           variant: item.variant,
+//           quantity: item.quantity,
+//           lengthPicked: item.lengthPicked
+//         }))
+//       )
+//     );
+
+//     setCartProducts(prev => ({
+//       ...prev,
+//       products: updatedItems,
+//       totalPrice: calculateTotalPrice(updatedItems)
+//     }));
+//   };
+
+//   const isAnyVariantInCart = (productId) => {
+//     return cartProducts.products.some(item => item.id === productId);
+//   };
+
+//   const calculateTotalLength = () => cartProducts?.products?.length || 0;
+
+//   // ✅ useMemo to derive cartCount and context value
+//   const cartCount = useMemo(() => {
+//     return loading ? 0 : cartProducts.products.length;
+//   }, [loading, cartProducts.products]);
+
+//   const cartContextValue = useMemo(() => ({
+//     loading,
+//     cartProducts,
+//     cartCount,
+//     isAnyVariantInCart,
+//     setCartProducts,
+//     addToCart,
+//     calculateTotalPrice,
+//     calculateTotalLength,
+//     updateCartItemLength,
+//     updateCartItemQuantity
+//   }), [
+//     loading,
+//     cartProducts,
+//     cartCount,
+//     selectedCurrency // because prices are converted
+//   ]);
+
+//   return (
+//     <CartContext.Provider value={cartContextValue}>
+//       {children}
+//     </CartContext.Provider>
+//   );
+// };
+
+// export default CartProvider;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import React, { createContext, useState, useEffect, useContext, useMemo } from 'react';
+// import { CurrencyContext } from '../../components/all_context/CurrencyContext';
+// import { toast } from "react-toastify";
+// import axios from 'axios';
+
+// export const CartContext = createContext();
+
+// const CartProvider = ({ children }) => {
+//   const { selectedCurrency, convertCurrency } = useContext(CurrencyContext);
+
+//   const [cartProducts, setCartProducts] = useState({
+//     products: [],
+//     totalPrice: 0,
+//   });
+//   const [loading, setLoading] = useState(true);
+
+//   const lengthsOfHair = [
+//     `12", 12", 12"`, `14", 14", 14"`, `16", 16", 16"`, `18", 18", 18"`,
+//     `20", 20", 20"`, `22", 22", 22"`, `24", 24", 24"`, `26", 26", 26"`, `28", 28", 28"`,
+//   ];
+
+//   const calculateTotalPrice = (products) => {
+//     let total = 0;
+//     products?.forEach(product => {
+//       const convertedPrice = convertCurrency(product.productPrice, import.meta.env.VITE_CURRENCY_CODE, selectedCurrency);
+//       if (!isNaN(convertedPrice)) {
+//         total += parseFloat(convertedPrice) * (product.quantity || 1);
+//       }
+//     });
+//     return total.toFixed(2);
+//   };
+
+//   const initializeCartProducts = async () => {
+//     const storedItems = JSON.parse(localStorage.getItem('cart_items')) || [];
+//     if (!storedItems || storedItems.length === 0) {
+//       setLoading(false);
+//       return { products: [], totalPrice: 0, cartEmpty: true };
+//     }
+
+//     const arrayOfIds = storedItems.map(item => item.id);
+//     console.log("Stored Items:", storedItems);
+//     try {
+//       const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/get-product-details`, {
+//         params: { ids: arrayOfIds }
+//       });
+//       console.log(response.data);
+
+//       if (response.data.code === 'success') {
+//         const validIds = response.data.data.map(productDetail => productDetail.id);
+//         const validStoredItems = storedItems.filter(item => validIds.includes(item.id));
+
+//         if (validStoredItems.length !== storedItems.length) {
+//           localStorage.setItem('cart_items', JSON.stringify(validStoredItems));
+//         }
+
+//         const mergedProducts = validStoredItems.map(storedItem => {
+//           const productDetail = response.data.data.find(p => p.id === storedItem.id);
+//           if (!productDetail) return null;
+
+//           // compute price dynamically from the variant
+//           const variantPrice = productDetail.productPrices
+//             ? JSON.parse(productDetail.productPrices).find(v => JSON.stringify(v) === JSON.stringify(storedItem.variant))?.price
+//             : productDetail.defaultPrice;
+
+//           const convertedPrice = Number(
+//             convertCurrency(variantPrice, import.meta.env.VITE_CURRENCY_CODE, selectedCurrency)
+//           );
+
+//           return {
+//             ...productDetail,
+//             quantity: storedItem.quantity || 1,
+//             variant: storedItem.variant,
+//             productPrice: variantPrice, // dynamic, not from localStorage
+//             updatedPrice: !isNaN(convertedPrice) ? convertedPrice.toLocaleString() : '0'
+//           };
+//         }).filter(Boolean);
+
+//         const totalPrice = calculateTotalPrice(mergedProducts);
+//         setLoading(false);
+
+//         return {
+//           products: mergedProducts,
+//           totalPrice,
+//           cartEmpty: mergedProducts.length === 0
+//         };
+//       } else {
+//         setLoading(false);
+//         return { products: [], totalPrice: 0, cartEmpty: true };
+//       }
+//     } catch (error) {
+//       console.log(error);
+//       setLoading(false);
+//       return { products: [], totalPrice: 0, cartEmpty: true };
+//     }
+//   };
+
+//   useEffect(() => {
+//     const fetchCartProducts = async () => {
+//       const result = await initializeCartProducts();
+//       setCartProducts(result);
+//     };
+//     fetchCartProducts();
+//   }, [selectedCurrency]); // If currency changes, we want to refetch the price
+
+//   const addToCart = (product, variant) => {
+//     setCartProducts(prev => {
+//       const existingIndex = prev.products.findIndex(
+//         item =>
+//           item.id === product.id &&
+//           JSON.stringify(item.variant) === JSON.stringify(variant)
+//       );
+
+//       let updatedProducts;
+
+//       if (existingIndex !== -1) {
+//         updatedProducts = prev.products.filter((_, i) => i !== existingIndex);
+//         toast.success("Product removed from cart");
+//       } else {
+//         updatedProducts = [
+//           ...prev.products,
+//           {
+//             id: product.id,
+//             variant,
+//             quantity: 1
+//           }
+//         ];
+//         toast.success("Product added successfully");
+//       }
+
+//       const updatedCart = {
+//         ...prev,
+//         products: updatedProducts
+//       };
+
+//       // persist to localStorage
+//       localStorage.setItem("cart_items", JSON.stringify(updatedProducts));
+
+//       return updatedCart;
+//     });
+//   };
+
+//   // const addToCart = async (product, variant) => {
+//   //   let getItems = JSON.parse(localStorage.getItem('cart_items')) || [];
+
+//   //   const existingIndex = getItems.findIndex(
+//   //     item => item.id === product.id && JSON.stringify(item.variant) === JSON.stringify(variant)
+//   //   );
+
+//   //   if (existingIndex !== -1) {
+//   //     getItems.splice(existingIndex, 1);
+//   //     toast.success("Product removed from cart");
+//   //   } else {
+//   //     // store only id, variant, quantity
+//   //     getItems.push({
+//   //       id: product.id,
+//   //       variant, // no price here!
+//   //       quantity: 1
+//   //     });
+//   //     toast.success("Product added successfully");
+//   //   }
+
+//   //   localStorage.setItem('cart_items', JSON.stringify(getItems));
+
+//   //   const result = await initializeCartProducts(); // fetch price dynamically
+//   //   setCartProducts(result);
+//   // };
+
+//   const updateCartItemLength = (productId, newLength, lengthPrice) => {
+//     const storedItems = JSON.parse(localStorage.getItem("cart_items")) || [];
+//     const storedItem = storedItems.find(item => item.id === productId);
+//     if (!storedItem) return;
+
+//     storedItem.lengthPicked = newLength;
+
+//     const updatedItems = cartProducts.products.map(item =>
+//       item.id === productId
+//         ? { ...item, lengthPicked: newLength, productPrice: lengthPrice }
+//         : item
+//     );
+
+//     localStorage.setItem("cart_items", JSON.stringify(storedItems));
+//     setCartProducts(prev => ({ ...prev, products: updatedItems }));
+//     toast.success('Length of product updated in cart');
+//   };
+
+//   const updateCartItemQuantity = (productId, newQuantity) => {
+//     const storedItems = JSON.parse(localStorage.getItem("cart_items")) || [];
+//     const storedItem = storedItems.find(item => item.id === productId);
+//     if (!storedItem) return;
+
+//     storedItem.quantity = newQuantity;
+
+//     const updatedItems = cartProducts.products.map(item =>
+//       item.id === productId ? { ...item, quantity: newQuantity } : item
+//     );
+
+//     localStorage.setItem("cart_items", JSON.stringify(
+//       updatedItems.map(item => ({
+//         id: item.id,
+//         quantity: item.quantity,
+//         lengthPicked: item.lengthPicked
+//       }))
+//     ));
+
+//     setCartProducts(prev => ({
+//       ...prev,
+//       products: updatedItems,
+//       totalPrice: calculateTotalPrice(updatedItems)
+//     }));
+//   };
+
+//   const isAnyVariantInCart = (productId) => {
+//     return cartProducts.products.some(item => item.id === productId);
+//   };
+
+//   const calculateTotalLength = () => cartProducts?.products?.length || 0;
+
+//   // ✅ useMemo to derive cartCount and context value
+//   const cartCount = useMemo(() => {
+//     return loading ? 0 : cartProducts.products.length;
+//   }, [loading, cartProducts.products]);
+
+//   const cartContextValue = useMemo(() => ({
+//     loading,
+//     cartProducts,
+//     cartCount,
+//     isAnyVariantInCart,
+//     setCartProducts,
+//     addToCart,
+//     calculateTotalPrice,
+//     calculateTotalLength,
+//     updateCartItemLength,
+//     updateCartItemQuantity
+//   }), [
+//     loading,
+//     cartProducts,
+//     cartCount,
+//     selectedCurrency // because prices are converted
+//   ]);
+
+//   return (
+//     <CartContext.Provider value={cartContextValue}>
+//       {children}
+//     </CartContext.Provider>
+//   );
+// };
+
+// export default CartProvider;
 
 
 

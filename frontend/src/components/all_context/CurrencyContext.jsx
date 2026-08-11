@@ -73,11 +73,12 @@ useEffect(() => {
     queryFn: async () => {
       const response = await axios.get(`${import.meta.env.VITE_BACKEND_URL}/fetch-currency-data`);
       console.log(response)
-      return response.data;
+      return response.data.data;
     },
     staleTime: 1000 * 60 * 30, // 30 minutes
     cacheTime: 1000 * 60 * 60, // 1 hour
   });
+  console.log(isCurrencyError)
     console.log(currencyData)
 
 
@@ -85,7 +86,6 @@ useEffect(() => {
   const currencySymbols = {};
   const currencyNames = {};
   const currencyCodes = {};
-
   if (currencyFetched) {
     currencyData.forEach(({ code, symbol, name }) => {
       currencyCodes[code] = { symbol, name };
@@ -93,18 +93,55 @@ useEffect(() => {
       currencyNames[code] = name;
     });
   }
+  // console.log(currencySymbols)
 
-  const convertCurrency = (amount, fromCurrency = defaultCurrency, toCurrency = selectedCurrency) => {
-    // console.log({amount, fromCurrency, toCurrency})
-    if (!ratesFetched || !exchangeData?.[fromCurrency] || !exchangeData?.[toCurrency]) {
-      console.error('Currency not supported or rates not fetched:', fromCurrency, toCurrency);
-      return null;
+  // const convertCurrency = (amount, fromCurrency = defaultCurrency, toCurrency = selectedCurrency) => {
+  //   // console.log({amount, fromCurrency, toCurrency})
+  //   if (!ratesFetched || !exchangeData?.[fromCurrency] || !exchangeData?.[toCurrency]) {
+  //     console.error('Currency not supported or rates not fetched:', fromCurrency, toCurrency);
+  //     return null;
+  //   }
+  //   const convertedAmount = (amount / exchangeData[fromCurrency]) * exchangeData[toCurrency];
+  //   if (isNaN(convertedAmount)) return null;
+  //   console.log(convertedAmount)
+  //   // return parseFloat(convertedAmount.toFixed(2));
+  //     // Round to the nearest whole number
+  //   return Math.round(convertedAmount);
+  // };
+
+  const convertCurrency = (
+    amount,
+    fromCurrency = defaultCurrency,
+    toCurrency = selectedCurrency
+  ) => {
+    // No conversion needed
+    if (fromCurrency === toCurrency) {
+      return Number(amount);
     }
-    const convertedAmount = (amount / exchangeData[fromCurrency]) * exchangeData[toCurrency];
-    if (isNaN(convertedAmount)) return null;
-    console.log(convertedAmount)
-    // return parseFloat(convertedAmount.toFixed(2));
-      // Round to the nearest whole number
+
+    if (
+      !ratesFetched ||
+      !exchangeData?.[fromCurrency] ||
+      !exchangeData?.[toCurrency]
+    ) {
+      console.error(
+        "Currency not supported or rates not fetched:",
+        fromCurrency,
+        toCurrency
+      );
+
+      // Instead of returning null
+      return Number(amount);
+    }
+
+    const convertedAmount =
+      (Number(amount) / exchangeData[fromCurrency]) *
+      exchangeData[toCurrency];
+
+    if (isNaN(convertedAmount)) {
+      return Number(amount);
+    }
+
     return Math.round(convertedAmount);
   };
 
